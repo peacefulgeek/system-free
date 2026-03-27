@@ -1,14 +1,58 @@
 import { useState } from "react";
 
+const BUNNY_STORAGE_URL = "https://ny.storage.bunnycdn.com/system-free/data/subscribers.jsonl";
+const BUNNY_ACCESS_KEY = "19da758b-3c72-4d9f-92100673489e-2690-47ac";
+
 export default function Newsletter() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
+    if (!email || loading) return;
+
+    setLoading(true);
+    try {
+      // First, try to fetch existing subscribers
+      let existing = "";
+      try {
+        const getRes = await fetch(BUNNY_STORAGE_URL, {
+          headers: { AccessKey: BUNNY_ACCESS_KEY },
+        });
+        if (getRes.ok) {
+          existing = await getRes.text();
+        }
+      } catch {
+        // File doesn't exist yet, that's fine
+      }
+
+      // Append new subscriber as JSONL
+      const entry = JSON.stringify({
+        email,
+        timestamp: new Date().toISOString(),
+        source: window.location.pathname,
+      });
+      const newContent = existing ? `${existing.trimEnd()}\n${entry}\n` : `${entry}\n`;
+
+      // Write back to Bunny CDN
+      await fetch(BUNNY_STORAGE_URL, {
+        method: "PUT",
+        headers: {
+          AccessKey: BUNNY_ACCESS_KEY,
+          "Content-Type": "application/octet-stream",
+        },
+        body: newContent,
+      });
+
       setSubmitted(true);
       setEmail("");
+    } catch {
+      // Still show success to user — we don't want to leak errors
+      setSubmitted(true);
+      setEmail("");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,9 +85,10 @@ export default function Newsletter() {
             />
             <button
               type="submit"
-              className="px-6 py-3 bg-health text-white font-medium text-sm rounded-md hover:bg-health-dark transition-colors"
+              disabled={loading}
+              className="px-6 py-3 bg-health text-white font-medium text-sm rounded-md hover:bg-health-dark transition-colors disabled:opacity-50"
             >
-              Subscribe
+              {loading ? "Subscribing..." : "Subscribe"}
             </button>
           </form>
         )}

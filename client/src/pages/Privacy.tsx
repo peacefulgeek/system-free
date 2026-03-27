@@ -50,6 +50,20 @@ export default function Privacy() {
             address.
           </p>
 
+          <h2>Hosting & Content Delivery</h2>
+          <p>
+            This website is hosted on Render and uses Bunny CDN
+            (bunny.net) for content delivery, image hosting, and font serving.
+            Bunny CDN may process your IP address and basic request metadata
+            (such as browser type and requested URL) to deliver content
+            efficiently. Bunny CDN's privacy policy is available at{" "}
+            <a href="https://bunny.net/privacy" target="_blank" rel="noopener">
+              bunny.net/privacy
+            </a>
+            . Newsletter subscriber data is stored on Bunny CDN storage in
+            JSONL format.
+          </p>
+
           <h2>Third-Party Links</h2>
           <p>
             Our articles may contain links to external websites. We are not

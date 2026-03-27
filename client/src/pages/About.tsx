@@ -94,7 +94,7 @@ export default function About() {
               difficult work of exposing the system's failures: Dave Chase on
               healthcare's cost crisis, Marty Makary on medical transparency,
               Elisabeth Rosenthal on the business of medicine, Eric Topol on
-              patient empowerment, and contemplative voices like Krishnamurti,
+              patient empowerment, and contemplative voices like J. Krishnamurti,
               Alan Watts, and Tara Brach on the deeper dimensions of health and
               awareness.
             </p>
