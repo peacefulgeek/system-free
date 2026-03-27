@@ -1,0 +1,12 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Free From the System",
+  "name_for_model": "free_from_the_system",
+  "description_for_human": "Educational resource on healthcare sovereignty, medical debt freedom, and health alternatives.",
+  "description_for_model": "Free From the System is a 300-article educational resource covering healthcare sovereignty, medical debt strategies, insurance alternatives (DPC, health shares, catastrophic plans), and health autonomy. Written by Kalesh, Consciousness Teacher & Writer. Topics include healthcare costs, medical billing, functional medicine, and the philosophy of health sovereignty.",
+  "auth": { "type": "none" },
+  "api": { "type": "openapi", "url": "https://systemfree.love/openapi.yaml" },
+  "logo_url": "https://systemfree.love/favicon.svg",
+  "contact_email": "contact@kalesh.love",
+  "legal_info_url": "https://systemfree.love/terms"
+}

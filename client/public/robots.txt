@@ -1,0 +1,30 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://systemfree.love/sitemap.xml
+
+# AI Crawlers Welcome
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Anthropic-AI
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+# AI Content Declaration
+# Site: Free From the System
+# Author: Kalesh — Consciousness Teacher & Writer
+# Content: 300 original articles on healthcare sovereignty
+# Contact: https://kalesh.love
