@@ -64,9 +64,22 @@ export default function Privacy() {
             JSONL format.
           </p>
 
+          <h2>Affiliate Disclosure</h2>
+          <p>
+            As an Amazon Associate I earn from qualifying purchases.
+          </p>
+          <p>
+            This site is a participant in the Amazon Services LLC Associates
+            Program, an affiliate advertising program designed to provide a
+            means for sites to earn advertising fees by advertising and linking
+            to Amazon.com. Some links on this site are affiliate links, meaning
+            we may earn a small commission at no additional cost to you.
+          </p>
+
           <h2>Third-Party Links</h2>
           <p>
-            Our articles may contain links to external websites. We are not
+            Our articles may contain links to external websites, including
+            affiliate links to Amazon.com and other retailers. We are not
             responsible for the privacy practices of those sites. We encourage
             you to review their privacy policies.
           </p>
@@ -81,11 +94,8 @@ export default function Privacy() {
           <h2>Your Rights</h2>
           <p>
             You have the right to access, correct, or delete any personal data
-            we hold about you. Contact us through{" "}
-            <a href="https://kalesh.love" target="_blank" rel="noopener">
-              kalesh.love
-            </a>{" "}
-            to exercise these rights.
+            we hold about you. You may exercise these rights by visiting our
+            website.
           </p>
 
           <h2>Changes to This Policy</h2>

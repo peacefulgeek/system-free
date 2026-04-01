@@ -80,6 +80,22 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  href="/tools"
+                  className="text-sm text-white/60 hover:text-white transition-colors no-underline"
+                >
+                  Tools We Recommend
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/assessments"
+                  className="text-sm text-white/60 hover:text-white transition-colors no-underline"
+                >
+                  Assessments
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/articles"
                   className="text-sm text-white/60 hover:text-white transition-colors no-underline"
                 >
@@ -123,8 +139,15 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Amazon Associate Disclosure */}
+        <div className="mt-10 pt-6 border-t border-white/10">
+          <p className="text-xs text-white/30 text-center">
+            As an Amazon Associate I earn from qualifying purchases.
+          </p>
+        </div>
+
         {/* Bottom */}
-        <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-4 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/30">
             &copy; {new Date().getFullYear()} Free From the System. All rights
             reserved. Educational content only — not medical or financial advice.

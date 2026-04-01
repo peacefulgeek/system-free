@@ -96,6 +96,17 @@ export default function Navigation() {
           </Link>
 
           <Link
+            href="/tools"
+            className={`text-sm font-medium transition-colors no-underline ${
+              location === "/tools"
+                ? "text-health"
+                : "text-foreground/70 hover:text-foreground"
+            }`}
+          >
+            Tools
+          </Link>
+
+          <Link
             href="/compare"
             className={`text-sm font-medium transition-colors no-underline ${
               location === "/compare"
@@ -155,6 +166,20 @@ export default function Navigation() {
               onClick={() => setMobileOpen(false)}
             >
               All Articles
+            </Link>
+            <Link
+              href="/tools"
+              className="block text-sm font-medium text-foreground/80 no-underline"
+              onClick={() => setMobileOpen(false)}
+            >
+              Tools We Recommend
+            </Link>
+            <Link
+              href="/assessments"
+              className="block text-sm font-medium text-foreground/80 no-underline"
+              onClick={() => setMobileOpen(false)}
+            >
+              Assessments
             </Link>
             <Link
               href="/compare"

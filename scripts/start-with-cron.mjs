@@ -68,6 +68,8 @@ function runAutoPublish() {
     ["/about", "0.7", "monthly"],
     ["/compare", "0.7", "monthly"],
     ["/quizzes", "0.7", "monthly"],
+    ["/assessments", "0.7", "monthly"],
+    ["/tools", "0.7", "monthly"],
     ["/privacy", "0.3", "yearly"],
     ["/terms", "0.3", "yearly"],
   ];
@@ -139,6 +141,24 @@ setInterval(runAutoPublish, SIX_HOURS);
 console.log("[cron] Auto-publish scheduled: every 6 hours");
 console.log("[cron] Phase 1: 5 articles/day (articles have staggered dateISO values)");
 console.log("[cron] Phase 2: After all 300 are live, new content at 5/week pace");
+
+// ─── Product Spotlight Cron ────────────────────────────────────────────────
+// Log a weekly product spotlight reminder (actual spotlight rotation is client-side)
+function productSpotlight() {
+  const spotlights = [
+    "Blood Pressure Monitor", "Berberine Supplement", "Meditation Cushion",
+    "Functional Medicine Guide", "EMF Meter", "Water Filter", "Air Purifier",
+    "Grounding Mat", "Red Light Therapy", "Vitamin D3+K2"
+  ];
+  const weekNum = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
+  const current = spotlights[weekNum % spotlights.length];
+  console.log(`[cron] Product Spotlight this week: ${current}`);
+}
+
+setTimeout(productSpotlight, 10000);
+const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+setInterval(productSpotlight, ONE_WEEK);
+console.log("[cron] Product spotlight rotation: weekly");
 
 // ─── Graceful shutdown ──────────────────────────────────────────────────────
 process.on("SIGTERM", () => {

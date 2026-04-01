@@ -18,6 +18,9 @@ export interface Article {
   openerType: string;
   conclusionType: string;
   backlinkType: string;
+  linkType?: string;
+  hasAffiliateLink?: boolean;
+  faqs?: { q: string; a: string }[];
 }
 
 export interface Category {

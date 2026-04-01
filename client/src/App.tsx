@@ -15,6 +15,9 @@ import Quizzes from "./pages/Quizzes";
 import QuizPage from "./pages/QuizPage";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Tools from "./pages/Tools";
+import Assessments from "./pages/Assessments";
+import AssessmentPage from "./pages/AssessmentPage";
 
 function Router() {
   return (
@@ -28,6 +31,9 @@ function Router() {
       <Route path="/compare" component={Compare} />
       <Route path="/quizzes" component={Quizzes} />
       <Route path="/quiz/:slug" component={QuizPage} />
+      <Route path="/assessments" component={Assessments} />
+      <Route path="/assessment/:slug" component={AssessmentPage} />
+      <Route path="/tools" component={Tools} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route path="/404" component={NotFound} />

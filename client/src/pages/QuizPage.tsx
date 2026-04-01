@@ -174,6 +174,35 @@ export default function QuizPage() {
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
+                  onClick={() => {
+                    const text = [
+                      `Free From the System — Quiz Results`,
+                      `Quiz: ${quiz.title}`,
+                      `Date: ${new Date().toLocaleDateString()}`,
+                      ``,
+                      `Score: ${totalScore}/${maxScore}`,
+                      `Level: ${result.level}`,
+                      ``,
+                      result.description,
+                      ``,
+                      `Your Answers:`,
+                      ...questions.map((q: any, i: number) => `${i+1}. ${q.q} — ${q.options[q.scores.indexOf(answers[i])]} (${answers[i]}/${4})`),
+                      ``,
+                      `Learn more at systemfree.love`,
+                    ].join('\n');
+                    const blob = new Blob([text], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${quiz.slug}-results.txt`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="px-6 py-3 bg-health text-white font-medium text-sm rounded-md hover:bg-health-dark transition-colors"
+                >
+                  Download Results
+                </button>
+                <button
                   onClick={restart}
                   className="px-6 py-3 bg-liberty text-white font-medium text-sm rounded-md hover:bg-liberty-light transition-colors"
                 >

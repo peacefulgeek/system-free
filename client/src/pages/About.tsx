@@ -66,6 +66,29 @@ export default function About() {
             </p>
 
             <h2>About Kalesh</h2>
+            <div className="flex flex-col sm:flex-row items-start gap-6 my-6 not-prose">
+              <img
+                src="https://system-free.b-cdn.net/images/kalesh-author.webp"
+                alt="Kalesh — Consciousness Teacher & Writer"
+                className="w-40 h-40 rounded-xl object-cover flex-shrink-0"
+              />
+              <div>
+                <h3 className="font-serif text-xl text-liberty mb-1">Kalesh</h3>
+                <p className="text-sm text-health font-medium mb-2">Consciousness Teacher & Writer</p>
+                <p className="text-foreground/70 text-sm leading-relaxed">
+                  Guiding seekers toward clarity, sovereignty, and the kind of
+                  health freedom that begins with awareness.
+                </p>
+                <a
+                  href="https://kalesh.love"
+                  target="_blank"
+                  rel="noopener"
+                  className="inline-block mt-3 bg-health text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-health-dark transition-colors no-underline"
+                >
+                  Visit kalesh.love
+                </a>
+              </div>
+            </div>
             <p>
               This site is written by{" "}
               <a
@@ -115,17 +138,7 @@ export default function About() {
               The system is broken. Your health doesn't have to be.
             </p>
 
-            <h2>Contact</h2>
-            <p>
-              For questions, collaboration, or just to say hello:{" "}
-              <a
-                href="https://kalesh.love"
-                target="_blank"
-                rel="noopener"
-              >
-                kalesh.love
-              </a>
-            </p>
+
           </div>
         </div>
       </section>
