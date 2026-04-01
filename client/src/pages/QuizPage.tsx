@@ -5,7 +5,6 @@ import SEOHead from "@/components/SEOHead";
 import { quizzes } from "./Quizzes";
 import NotFound from "./NotFound";
 
-// Quiz question bank — deterministic per quiz slug
 function generateQuestions(slug: string) {
   const banks: Record<string, Array<{ q: string; options: string[]; scores: number[] }>> = {
     "healthcare-sovereignty-readiness": [
@@ -34,7 +33,6 @@ function generateQuestions(slug: string) {
     ],
   };
 
-  // For quizzes without specific banks, generate generic sovereignty questions
   const defaultBank = [
     { q: "How well do you understand the true cost of your healthcare?", options: ["Not at all", "Somewhat", "Well", "Expertly"], scores: [1, 2, 3, 4] },
     { q: "Have you explored alternatives to traditional health insurance?", options: ["Never", "Briefly", "Seriously", "Already switched"], scores: [1, 2, 3, 4] },
@@ -53,10 +51,10 @@ function generateQuestions(slug: string) {
 
 function getResultText(score: number, maxScore: number) {
   const pct = score / maxScore;
-  if (pct >= 0.8) return { level: "High Sovereignty", color: "text-health", description: "You're well on your way to healthcare independence. You understand the system's flaws and have already begun building alternatives. Keep going — and share what you've learned." };
-  if (pct >= 0.6) return { level: "Growing Awareness", color: "text-liberty", description: "You're asking the right questions and starting to see the system for what it is. The next step is action — explore DPC, run the numbers, and start building your exit strategy." };
-  if (pct >= 0.4) return { level: "Early Awakening", color: "text-warm-dark", description: "Something brought you here, and that matters. You're beginning to question the system. Start with the basics — read about the real costs, understand your options, and take one step this week." };
-  return { level: "System Dependent", color: "text-destructive", description: "You're still deeply embedded in the traditional system. That's okay — awareness is the first step. Start with our 'Start Here' page and begin understanding what you're actually paying for." };
+  if (pct >= 0.8) return { level: "High Sovereignty", color: "text-health", bg: "bg-health/10", description: "You're well on your way to healthcare independence. You understand the system's flaws and have already begun building alternatives. Keep going — and share what you've learned." };
+  if (pct >= 0.6) return { level: "Growing Awareness", color: "text-liberty", bg: "bg-liberty/10", description: "You're asking the right questions and starting to see the system for what it is. The next step is action — explore DPC, run the numbers, and start building your exit strategy." };
+  if (pct >= 0.4) return { level: "Early Awakening", color: "text-amber-600", bg: "bg-amber/10", description: "Something brought you here, and that matters. You're beginning to question the system. Start with the basics — read about the real costs, understand your options, and take one step this week." };
+  return { level: "System Dependent", color: "text-red-500", bg: "bg-red-50", description: "You're still deeply embedded in the traditional system. That's okay — awareness is the first step. Start with our 'Start Here' page and begin understanding what you're actually paying for." };
 }
 
 export default function QuizPage() {
@@ -93,136 +91,103 @@ export default function QuizPage() {
 
   return (
     <Layout>
-      <SEOHead
-        title={quiz.title}
-        description={quiz.description}
-        url={`/quiz/${quiz.slug}`}
-      />
+      <SEOHead title={`${quiz.title} — Free From the System`} description={quiz.description} url={`/quiz/${quiz.slug}`} />
 
-      <section className="container py-12 md:py-20">
-        <div className="max-w-2xl mx-auto">
-          {!showResults ? (
-            <>
-              <p className="text-sm font-semibold uppercase tracking-widest text-health mb-4">
-                {quiz.category} &middot; Question {currentQ + 1} of{" "}
-                {questions.length}
-              </p>
-              <h1 className="font-serif text-2xl md:text-3xl text-liberty mb-8 leading-snug">
-                {questions[currentQ].q}
-              </h1>
+      <section className="py-12 md:py-20">
+        <div className="container">
+          <div className="max-w-2xl mx-auto">
+            {!showResults ? (
+              <>
+                {/* Quiz Header */}
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-xs font-bold uppercase tracking-[0.15em] text-health">{quiz.category}</span>
+                  <span className="text-xs text-muted-foreground">Question {currentQ + 1} of {questions.length}</span>
+                </div>
 
-              {/* Progress bar */}
-              <div className="w-full h-1.5 bg-cream-dark rounded-full mb-8">
-                <div
-                  className="h-full bg-health rounded-full transition-all duration-300"
-                  style={{
-                    width: `${((currentQ + 1) / questions.length) * 100}%`,
-                  }}
-                />
-              </div>
+                {/* Progress bar */}
+                <div className="w-full h-2 bg-cream-dark rounded-full mb-10 overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-health to-health-dark rounded-full transition-all duration-500 ease-out" style={{ width: `${((currentQ + 1) / questions.length) * 100}%` }} />
+                </div>
 
-              <div className="space-y-3">
-                {questions[currentQ].options.map((option, i) => (
+                <h1 className="text-liberty text-2xl md:text-3xl leading-snug mb-10" style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}>
+                  {questions[currentQ].q}
+                </h1>
+
+                <div className="space-y-3">
+                  {questions[currentQ].options.map((option, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleAnswer(questions[currentQ].scores[i])}
+                      className="w-full text-left p-5 rounded-xl border-2 border-border/50 bg-card hover:border-health/40 hover:bg-health/5 transition-all duration-200 text-[15px] font-medium group"
+                    >
+                      <span className="inline-flex items-center gap-3">
+                        <span className="w-8 h-8 rounded-full border-2 border-border/50 group-hover:border-health group-hover:bg-health group-hover:text-white flex items-center justify-center text-xs font-bold text-muted-foreground transition-all">
+                          {String.fromCharCode(65 + i)}
+                        </span>
+                        {option}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Results */}
+                <p className="text-xs font-bold uppercase tracking-[0.15em] text-health mb-4">Your Results</p>
+                <h1 className="text-liberty text-3xl md:text-4xl leading-snug mb-8" style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}>
+                  {quiz.title}
+                </h1>
+
+                <div className="rich-card p-8 mb-8">
+                  <div className="text-center mb-6">
+                    <p className="text-sm text-muted-foreground mb-2">Your Score</p>
+                    <p className="text-5xl font-bold text-liberty" style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}>
+                      {totalScore}<span className="text-2xl text-muted-foreground">/{maxScore}</span>
+                    </p>
+                  </div>
+
+                  <div className="w-full h-3 bg-cream-dark rounded-full mb-6 overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-health to-health-dark rounded-full transition-all duration-700" style={{ width: `${(totalScore / maxScore) * 100}%` }} />
+                  </div>
+
+                  <div className={`${result.bg} rounded-xl p-6 mb-4`}>
+                    <h2 className={`text-2xl ${result.color} mb-3`} style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}>{result.level}</h2>
+                    <p className="text-muted-foreground leading-relaxed">{result.description}</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
                   <button
-                    key={i}
-                    onClick={() => handleAnswer(questions[currentQ].scores[i])}
-                    className="w-full text-left p-4 rounded-lg border border-border bg-card hover:border-health/30 hover:bg-cream-dark transition-all duration-200 text-sm"
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="text-sm font-semibold uppercase tracking-widest text-health mb-4">
-                Your Results
-              </p>
-              <h1 className="font-serif text-3xl md:text-4xl text-liberty mb-4 leading-snug">
-                {quiz.title}
-              </h1>
-
-              <div className="bg-card rounded-lg p-8 border border-border mb-8">
-                <div className="text-center mb-6">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Your Score
-                  </p>
-                  <p className="font-serif text-5xl text-liberty">
-                    {totalScore}
-                    <span className="text-2xl text-muted-foreground">
-                      /{maxScore}
-                    </span>
-                  </p>
-                </div>
-
-                <div className="w-full h-3 bg-cream-dark rounded-full mb-6">
-                  <div
-                    className="h-full bg-health rounded-full transition-all duration-500"
-                    style={{
-                      width: `${(totalScore / maxScore) * 100}%`,
+                    onClick={() => {
+                      const text = [
+                        `Free From the System — Quiz Results`,
+                        `Quiz: ${quiz.title}`,
+                        `Date: ${new Date().toLocaleDateString()}`,
+                        ``, `Score: ${totalScore}/${maxScore}`, `Level: ${result.level}`, ``,
+                        result.description, ``, `Your Answers:`,
+                        ...questions.map((q: any, i: number) => `${i+1}. ${q.q} — ${q.options[q.scores.indexOf(answers[i])]} (${answers[i]}/${4})`),
+                        ``, `Learn more at systemfree.love`,
+                      ].join('\n');
+                      const blob = new Blob([text], { type: 'text/plain' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url; a.download = `${quiz.slug}-results.txt`; a.click();
+                      URL.revokeObjectURL(url);
                     }}
-                  />
+                    className="px-6 py-3.5 bg-health text-white font-semibold text-sm rounded-lg hover:bg-health-dark transition-colors shadow-md"
+                  >
+                    Download Results
+                  </button>
+                  <button onClick={restart} className="px-6 py-3.5 bg-liberty text-white font-semibold text-sm rounded-lg hover:bg-liberty-light transition-colors shadow-md">
+                    Retake Quiz
+                  </button>
+                  <Link href="/quizzes" className="px-6 py-3.5 bg-cream-dark text-foreground font-semibold text-sm rounded-lg hover:bg-border transition-colors text-center no-underline">
+                    More Quizzes
+                  </Link>
                 </div>
-
-                <h2 className={`font-serif text-2xl ${result.color} mb-3`}>
-                  {result.level}
-                </h2>
-                <p className="text-muted-foreground leading-relaxed">
-                  {result.description}
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  onClick={() => {
-                    const text = [
-                      `Free From the System — Quiz Results`,
-                      `Quiz: ${quiz.title}`,
-                      `Date: ${new Date().toLocaleDateString()}`,
-                      ``,
-                      `Score: ${totalScore}/${maxScore}`,
-                      `Level: ${result.level}`,
-                      ``,
-                      result.description,
-                      ``,
-                      `Your Answers:`,
-                      ...questions.map((q: any, i: number) => `${i+1}. ${q.q} — ${q.options[q.scores.indexOf(answers[i])]} (${answers[i]}/${4})`),
-                      ``,
-                      `Learn more at systemfree.love`,
-                    ].join('\n');
-                    const blob = new Blob([text], { type: 'text/plain' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${quiz.slug}-results.txt`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                  }}
-                  className="px-6 py-3 bg-health text-white font-medium text-sm rounded-md hover:bg-health-dark transition-colors"
-                >
-                  Download Results
-                </button>
-                <button
-                  onClick={restart}
-                  className="px-6 py-3 bg-liberty text-white font-medium text-sm rounded-md hover:bg-liberty-light transition-colors"
-                >
-                  Retake Quiz
-                </button>
-                <Link
-                  href="/quizzes"
-                  className="px-6 py-3 bg-cream-dark text-foreground font-medium text-sm rounded-md hover:bg-border transition-colors text-center no-underline"
-                >
-                  More Quizzes
-                </Link>
-                <Link
-                  href="/start-here"
-                  className="px-6 py-3 bg-health text-white font-medium text-sm rounded-md hover:bg-health-dark transition-colors text-center no-underline"
-                >
-                  Start Here
-                </Link>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
       </section>
     </Layout>

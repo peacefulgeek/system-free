@@ -5,51 +5,42 @@ import ArticleCard from "@/components/ArticleCard";
 import Newsletter from "@/components/Newsletter";
 import { liveArticles, categories, SITE_CONFIG } from "@/data";
 
-export default function Home() {
-  const featured = liveArticles[0];
-  const recent = liveArticles.slice(1, 7);
-  const byCategory = categories.map((cat) => ({
-    ...cat,
-    articles: liveArticles
-      .filter((a) => a.category === cat.slug)
-      .slice(0, 3),
-  }));
+const HERO_IMG = "https://system-free.b-cdn.net/images/hero-home.webp";
 
+const featured = liveArticles.slice(0, 6);
+const latest = liveArticles.slice(0, 3);
+
+export default function Home() {
   return (
     <Layout>
-      <SEOHead />
+      <SEOHead
+        title="Free From the System — Healthcare Sovereignty Starts Here"
+        description={SITE_CONFIG.description}
+        url="/"
+      />
 
-      {/* Hero */}
-      <section className="relative py-20 md:py-28 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-cream via-cream to-cream-dark" />
-        <div className="container relative">
-          <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-widest text-health mb-4">
+      {/* ─── Hero ─────────────────────────────────── */}
+      <section className="page-hero min-h-[560px] md:min-h-[640px]">
+        <img src={HERO_IMG} alt="" className="hero-bg" loading="eager" />
+        <div className="container">
+          <div className="max-w-2xl">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-amber mb-4 opacity-0 animate-fade-in-up">
               Healthcare Sovereignty
             </p>
-            <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl text-liberty mb-6 leading-[1.05]">
-              The system is broken.
-              <br />
-              <span className="text-health italic">
+            <h1 className="text-white mb-6 opacity-0 animate-fade-in-up animate-delay-100" style={{ fontSize: 'clamp(2.5rem, 6vw, 4.25rem)', lineHeight: 1.08 }}>
+              The system is broken.{" "}
+              <span className="text-health" style={{ fontStyle: 'italic' }}>
                 Your health doesn't have to be.
               </span>
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mb-8">
-              Evidence-based strategies for healthcare independence, medical debt
-              freedom, and the kind of health sovereignty that comes from
-              understanding the system well enough to leave it behind.
+            <p className="text-white/80 text-lg md:text-xl leading-relaxed mb-8 max-w-xl opacity-0 animate-fade-in-up animate-delay-200">
+              Evidence-based strategies for healthcare independence, medical debt freedom, and the kind of health sovereignty that comes from understanding the system well enough to leave it behind.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/start-here"
-                className="inline-flex items-center px-6 py-3 bg-health text-white font-medium text-sm rounded-md hover:bg-health-dark transition-colors no-underline"
-              >
-                Start Here
+            <div className="flex flex-wrap gap-4 opacity-0 animate-fade-in-up animate-delay-300">
+              <Link href="/start-here" className="btn-primary">
+                Start Your Journey
               </Link>
-              <Link
-                href="/articles"
-                className="inline-flex items-center px-6 py-3 bg-liberty text-white font-medium text-sm rounded-md hover:bg-liberty-light transition-colors no-underline"
-              >
+              <Link href="/articles" className="btn-outline !border-white/30 !text-white hover:!bg-white/10 hover:!border-white/50">
                 Browse Articles
               </Link>
             </div>
@@ -57,90 +48,178 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Article */}
-      {featured && (
-        <section className="container py-12">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="font-serif text-3xl text-liberty">Featured</h2>
+      {/* ─── Featured Articles ────────────────────── */}
+      <section className="py-20 md:py-28">
+        <div className="container">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.15em] text-health mb-2">Latest Thinking</p>
+              <h2 className="text-liberty">Featured Articles</h2>
+            </div>
+            <Link href="/articles" className="text-health font-semibold text-sm mt-4 md:mt-0 hover:underline no-underline">
+              View all articles &rarr;
+            </Link>
           </div>
-          <ArticleCard article={featured} featured />
-        </section>
-      )}
 
-      {/* Recent Articles */}
-      <section className="container py-12">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="font-serif text-3xl text-liberty">Recent</h2>
-          <Link
-            href="/articles"
-            className="text-sm font-medium text-health hover:text-health-dark transition-colors no-underline"
-          >
-            View all &rarr;
-          </Link>
-        </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {recent.map((article) => (
-            <ArticleCard key={article.id} article={article} />
-          ))}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featured.map((article) => (
+              <ArticleCard key={article.slug} article={article} />
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Category Sections */}
-      {byCategory.map(
-        (cat) =>
-          cat.articles.length > 0 && (
-            <section key={cat.slug} className="container py-12">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h2 className="font-serif text-2xl text-liberty">
-                    {cat.name}
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {cat.description}
-                  </p>
-                </div>
+      {/* ─── Category Showcase ────────────────────── */}
+      <section className="section-sage py-20 md:py-28">
+        <div className="container">
+          <div className="text-center mb-14">
+            <p className="text-sm font-bold uppercase tracking-[0.15em] text-health mb-2">Explore by Topic</p>
+            <h2 className="text-liberty mb-4">Five Paths to Freedom</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg leading-relaxed">
+              Each category represents a different dimension of healthcare sovereignty. Start wherever resonates most.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categories.map((cat, i) => {
+              const catArticles = liveArticles.filter(a => a.category === cat.slug);
+              const catImage = catArticles[0]?.heroImage;
+              const icons = ["🚪", "🌿", "📊", "⛓️", "👑"];
+              return (
                 <Link
+                  key={cat.slug}
                   href={`/category/${cat.slug}`}
-                  className="text-sm font-medium text-health hover:text-health-dark transition-colors no-underline whitespace-nowrap"
+                  className={`rich-card group no-underline ${i === 0 ? 'md:col-span-2 lg:col-span-2' : ''}`}
                 >
-                  See all &rarr;
+                  <div className="overflow-hidden">
+                    {catImage && (
+                      <img
+                        src={catImage}
+                        alt={cat.name}
+                        loading="lazy"
+                        className={`w-full object-cover ${i === 0 ? 'h-52' : 'h-40'}`}
+                        style={{ aspectRatio: 'auto' }}
+                      />
+                    )}
+                  </div>
+                  <div className="p-6">
+                    <span className="text-2xl mb-2 block">{icons[i]}</span>
+                    <h3 className="text-liberty text-xl mb-2 group-hover:text-health transition-colors">{cat.name}</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">{cat.description}</p>
+                    <p className="text-xs text-health font-semibold mt-3">{catArticles.length} articles</p>
+                  </div>
                 </Link>
-              </div>
-              <div className="grid md:grid-cols-3 gap-6">
-                {cat.articles.map((article) => (
-                  <ArticleCard key={article.id} article={article} />
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Why This Exists ──────────────────────── */}
+      <section className="section-deep py-20 md:py-28">
+        <div className="container">
+          <div className="max-w-3xl mx-auto text-center">
+            <p className="text-sm font-bold uppercase tracking-[0.15em] text-amber mb-4">The Mission</p>
+            <h2 className="text-white mb-8" style={{ fontStyle: 'italic' }}>
+              "The mind is not the enemy. The system that profits from your confusion is."
+            </h2>
+            <p className="text-white/70 text-lg leading-relaxed mb-8">
+              Free From the System exists because healthcare should not require financial ruin. We publish evidence-based research on alternatives to traditional insurance, strategies for eliminating medical debt, and practical paths to health sovereignty — written by someone who has walked this path.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link href="/about" className="btn-primary">
+                Meet Kalesh
+              </Link>
+              <Link href="/compare" className="btn-outline !border-white/20 !text-white hover:!bg-white/10 hover:!border-white/40">
+                Cost Calculator
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Latest + Quick Links ─────────────────── */}
+      <section className="py-20 md:py-28">
+        <div className="container">
+          <div className="grid lg:grid-cols-3 gap-12">
+            {/* Latest articles */}
+            <div className="lg:col-span-2">
+              <p className="text-sm font-bold uppercase tracking-[0.15em] text-health mb-2">Just Published</p>
+              <h2 className="text-liberty mb-8">Latest Articles</h2>
+              <div className="space-y-6">
+                {latest.map((article) => (
+                  <Link
+                    key={article.slug}
+                    href={`/articles/${article.slug}`}
+                    className="flex gap-5 group no-underline"
+                  >
+                    <img
+                      src={article.heroImage}
+                      alt={article.title}
+                      loading="lazy"
+                      className="w-28 h-28 md:w-36 md:h-28 rounded-lg object-cover flex-shrink-0"
+                    />
+                    <div className="flex flex-col justify-center">
+                      <span className="badge-category mb-2 w-fit">{article.categoryName}</span>
+                      <h3 className="text-liberty text-lg leading-snug group-hover:text-health transition-colors mb-1">{article.title}</h3>
+                      <p className="text-muted-foreground text-sm line-clamp-2">{article.description}</p>
+                    </div>
+                  </Link>
                 ))}
               </div>
-            </section>
-          )
-      )}
+            </div>
 
-      {/* Newsletter */}
-      <Newsletter />
+            {/* Sidebar */}
+            <div className="space-y-8">
+              {/* Quick links */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h3 className="text-liberty text-lg mb-4">Quick Start</h3>
+                <div className="space-y-3">
+                  {[
+                    { href: "/start-here", label: "Start Here Guide", icon: "📖" },
+                    { href: "/compare", label: "Cost Calculator", icon: "🧮" },
+                    { href: "/quizzes", label: "Take a Quiz", icon: "✅" },
+                    { href: "/assessments", label: "Self-Assessment", icon: "📋" },
+                    { href: "/tools", label: "Recommended Tools", icon: "🛠️" },
+                  ].map(({ href, label, icon }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-cream-dark transition-colors no-underline text-foreground"
+                    >
+                      <span className="text-lg">{icon}</span>
+                      <span className="font-medium text-sm">{label}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
 
-      {/* About Kalesh */}
-      <section className="container py-16">
-        <div className="max-w-2xl mx-auto text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-health mb-4">
-            About the Author
-          </p>
-          <h2 className="font-serif text-3xl text-liberty mb-4">
-            {SITE_CONFIG.author}
-          </h2>
-          <p className="text-muted-foreground leading-relaxed mb-6">
-            {SITE_CONFIG.authorTitle}. Writing at the intersection of
-            consciousness, healthcare sovereignty, and the kind of clarity that
-            only comes from questioning everything the system taught you to
-            accept.
-          </p>
-          <a
-            href={SITE_CONFIG.authorLink}
-            className="inline-flex items-center text-sm font-medium text-health hover:text-health-dark transition-colors"
-            target="_blank"
-            rel="noopener"
-          >
-            Visit kalesh.love &rarr;
-          </a>
+              {/* Stats */}
+              <div className="bg-liberty rounded-xl p-6 text-white">
+                <h3 className="text-white text-lg mb-4">By the Numbers</h3>
+                <div className="space-y-4">
+                  {[
+                    { num: `${liveArticles.length}+`, label: "Articles Published" },
+                    { num: "5", label: "Topic Categories" },
+                    { num: "9", label: "Interactive Quizzes" },
+                    { num: "8", label: "Self-Assessments" },
+                  ].map(({ num, label }) => (
+                    <div key={label} className="flex items-center gap-3">
+                      <span className="text-2xl font-serif text-amber">{num}</span>
+                      <span className="text-white/70 text-sm">{label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Newsletter ───────────────────────────── */}
+      <section className="section-warm py-20 md:py-28">
+        <div className="container">
+          <Newsletter />
         </div>
       </section>
     </Layout>

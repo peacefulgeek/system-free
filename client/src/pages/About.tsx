@@ -3,6 +3,8 @@ import SEOHead from "@/components/SEOHead";
 import Newsletter from "@/components/Newsletter";
 import { SITE_CONFIG } from "@/data";
 
+const HERO_IMG = "https://system-free.b-cdn.net/images/hero-about.webp";
+
 export default function About() {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -20,22 +22,30 @@ export default function About() {
   return (
     <Layout>
       <SEOHead
-        title="About"
+        title="About — Free From the System"
         description="About Free From the System and its author Kalesh — Consciousness Teacher & Writer. Why this site exists and what it stands for."
         url="/about"
         jsonLd={jsonLd}
       />
 
-      <section className="container py-12 md:py-20">
-        <div className="max-w-[720px] mx-auto">
-          <p className="text-sm font-semibold uppercase tracking-widest text-health mb-4">
-            About
-          </p>
-          <h1 className="font-serif text-4xl md:text-5xl text-liberty mb-8 leading-[1.1]">
-            Why This Site Exists
-          </h1>
+      {/* Hero */}
+      <section className="page-hero min-h-[480px]">
+        <img src={HERO_IMG} alt="" className="hero-bg" loading="eager" />
+        <div className="container">
+          <div className="max-w-2xl">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-amber mb-4 opacity-0 animate-fade-in-up">About</p>
+            <h1 className="text-white mb-6 opacity-0 animate-fade-in-up animate-delay-100">Why This Site Exists</h1>
+            <p className="text-white/80 text-lg leading-relaxed max-w-xl opacity-0 animate-fade-in-up animate-delay-200">
+              The system is broken. Your health doesn't have to be.
+            </p>
+          </div>
+        </div>
+      </section>
 
-          <div className="article-prose">
+      {/* Content */}
+      <section className="py-16 md:py-24">
+        <div className="container">
+          <div className="max-w-[720px] mx-auto article-prose">
             <p>
               The American healthcare system is the most expensive in the world.
               It is also, by nearly every meaningful measure, one of the least
@@ -64,64 +74,58 @@ export default function About() {
               alternatives are not fringe — they are the future that the
               insurance-pharmaceutical complex is fighting to suppress.
             </p>
+          </div>
+        </div>
+      </section>
 
-            <h2>About Kalesh</h2>
-            <div className="flex flex-col sm:flex-row items-start gap-6 my-6 not-prose">
-              <img
-                src="https://system-free.b-cdn.net/images/kalesh-author.webp"
-                alt="Kalesh — Consciousness Teacher & Writer"
-                className="w-40 h-40 rounded-xl object-cover flex-shrink-0"
-              />
+      {/* Author Section */}
+      <section className="section-sage py-20 md:py-28">
+        <div className="container">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-col md:flex-row gap-10 items-start">
+              <div className="flex-shrink-0">
+                <img
+                  src="https://system-free.b-cdn.net/images/kalesh-author.webp"
+                  alt="Kalesh — Consciousness Teacher & Writer"
+                  className="w-48 h-48 md:w-56 md:h-56 rounded-2xl object-cover shadow-lg"
+                />
+              </div>
               <div>
-                <h3 className="font-serif text-xl text-liberty mb-1">Kalesh</h3>
-                <p className="text-sm text-health font-medium mb-2">Consciousness Teacher & Writer</p>
-                <p className="text-foreground/70 text-sm leading-relaxed">
-                  Guiding seekers toward clarity, sovereignty, and the kind of
-                  health freedom that begins with awareness.
-                </p>
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-health mb-2">The Author</p>
+                <h2 className="text-liberty mb-1">Kalesh</h2>
+                <p className="text-health font-semibold mb-4">Consciousness Teacher & Writer</p>
+                <div className="text-muted-foreground leading-relaxed space-y-4">
+                  <p>
+                    This site is written by{" "}
+                    <a href="https://kalesh.love" target="_blank" rel="noopener" className="text-health hover:text-health-dark underline underline-offset-2">
+                      Kalesh
+                    </a>, a consciousness teacher and writer who works at the intersection of awareness, healthcare sovereignty, and the kind of clarity that only comes from questioning everything the system taught you to accept.
+                  </p>
+                  <p>
+                    The mind is not the enemy — but it is often the mechanism through which the system maintains its grip. Most of what passes for healing in the modern world is just symptom management with better marketing. Kalesh writes to help people see through the conditioning — not just in healthcare, but in the deeper patterns of thought and identity that keep us dependent on systems that were never designed to serve us.
+                  </p>
+                  <p>
+                    The work here draws on researchers and thinkers who have done the difficult work of exposing the system's failures: Dave Chase on healthcare's cost crisis, Marty Makary on medical transparency, Elisabeth Rosenthal on the business of medicine, Eric Topol on patient empowerment, and contemplative voices like J. Krishnamurti, Alan Watts, and Tara Brach on the deeper dimensions of health and awareness.
+                  </p>
+                </div>
                 <a
                   href="https://kalesh.love"
                   target="_blank"
                   rel="noopener"
-                  className="inline-block mt-3 bg-health text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-health-dark transition-colors no-underline"
+                  className="btn-primary inline-flex mt-6"
                 >
                   Visit kalesh.love
                 </a>
               </div>
             </div>
-            <p>
-              This site is written by{" "}
-              <a
-                href="https://kalesh.love"
-                target="_blank"
-                rel="noopener"
-              >
-                Kalesh
-              </a>
-              , a consciousness teacher and writer who works at the intersection
-              of awareness, healthcare sovereignty, and the kind of clarity that
-              only comes from questioning everything the system taught you to
-              accept.
-            </p>
-            <p>
-              The mind is not the enemy — but it is often the mechanism through
-              which the system maintains its grip. Most of what passes for
-              healing in the modern world is just symptom management with better
-              marketing. Kalesh writes to help people see through the
-              conditioning — not just in healthcare, but in the deeper patterns
-              of thought and identity that keep us dependent on systems that were
-              never designed to serve us.
-            </p>
-            <p>
-              The work here draws on researchers and thinkers who have done the
-              difficult work of exposing the system's failures: Dave Chase on
-              healthcare's cost crisis, Marty Makary on medical transparency,
-              Elisabeth Rosenthal on the business of medicine, Eric Topol on
-              patient empowerment, and contemplative voices like J. Krishnamurti,
-              Alan Watts, and Tara Brach on the deeper dimensions of health and
-              awareness.
-            </p>
+          </div>
+        </div>
+      </section>
 
+      {/* What This Is Not */}
+      <section className="py-16 md:py-24">
+        <div className="container">
+          <div className="max-w-[720px] mx-auto article-prose">
             <h2>What This Site Is Not</h2>
             <p>
               This is not medical advice. This is not financial advice. This is
@@ -134,16 +138,19 @@ export default function About() {
               evidence, strategies, and perspectives designed to help you make
               informed decisions about your health and your money.
             </p>
-            <p>
+            <blockquote>
               The system is broken. Your health doesn't have to be.
-            </p>
-
-
+            </blockquote>
           </div>
         </div>
       </section>
 
-      <Newsletter />
+      {/* Newsletter */}
+      <section className="section-warm py-20 md:py-28">
+        <div className="container">
+          <Newsletter />
+        </div>
+      </section>
     </Layout>
   );
 }

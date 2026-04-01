@@ -14,7 +14,6 @@ export default function Newsletter() {
 
     setLoading(true);
     try {
-      // First, try to fetch existing subscribers
       let existing = "";
       try {
         const getRes = await fetch(BUNNY_STORAGE_URL, {
@@ -24,10 +23,9 @@ export default function Newsletter() {
           existing = await getRes.text();
         }
       } catch {
-        // File doesn't exist yet, that's fine
+        // File doesn't exist yet
       }
 
-      // Append new subscriber as JSONL
       const entry = JSON.stringify({
         email,
         timestamp: new Date().toISOString(),
@@ -35,7 +33,6 @@ export default function Newsletter() {
       });
       const newContent = existing ? `${existing.trimEnd()}\n${entry}\n` : `${entry}\n`;
 
-      // Write back to Bunny CDN
       await fetch(BUNNY_STORAGE_URL, {
         method: "PUT",
         headers: {
@@ -48,7 +45,6 @@ export default function Newsletter() {
       setSubmitted(true);
       setEmail("");
     } catch {
-      // Still show success to user — we don't want to leak errors
       setSubmitted(true);
       setEmail("");
     } finally {
@@ -57,42 +53,38 @@ export default function Newsletter() {
   };
 
   return (
-    <section className="bg-liberty py-16">
-      <div className="max-w-xl mx-auto px-4 text-center">
-        <h2 className="font-serif text-3xl text-white mb-3">
-          Stay Free
-        </h2>
-        <p className="text-sm text-white/60 mb-8 leading-relaxed">
-          New articles on healthcare sovereignty, medical debt strategies, and
-          health alternatives — delivered weekly. No spam. Unsubscribe anytime.
-        </p>
-        {submitted ? (
-          <p className="text-health font-medium">
-            Welcome aboard. Check your inbox.
-          </p>
-        ) : (
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col sm:flex-row gap-3"
+    <div className="max-w-2xl mx-auto text-center">
+      <p className="text-sm font-bold uppercase tracking-[0.15em] text-health mb-3">Stay Informed</p>
+      <h2 className="text-liberty mb-4" style={{ fontStyle: 'italic' }}>
+        Healthcare sovereignty, delivered weekly.
+      </h2>
+      <p className="text-muted-foreground text-base leading-relaxed mb-8 max-w-lg mx-auto">
+        New articles on medical debt strategies, insurance alternatives, and health independence — no spam, no selling your data. Unsubscribe anytime.
+      </p>
+      {submitted ? (
+        <div className="bg-health/10 rounded-xl p-6 border border-health/20">
+          <p className="text-health font-semibold text-lg mb-1">Welcome aboard.</p>
+          <p className="text-muted-foreground text-sm">Your first issue arrives this week.</p>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your@email.com"
+            required
+            className="flex-1 px-5 py-3.5 rounded-lg bg-card border border-border text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:ring-2 focus:ring-health/30 focus:border-health/50 transition-all"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary !py-3.5 whitespace-nowrap"
           >
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              required
-              className="flex-1 px-4 py-3 rounded-md bg-white/10 border border-white/20 text-white placeholder:text-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-health/50"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-3 bg-health text-white font-medium text-sm rounded-md hover:bg-health-dark transition-colors disabled:opacity-50"
-            >
-              {loading ? "Subscribing..." : "Subscribe"}
-            </button>
-          </form>
-        )}
-      </div>
-    </section>
+            {loading ? "Subscribing..." : "Subscribe Free"}
+          </button>
+        </form>
+      )}
+    </div>
   );
 }

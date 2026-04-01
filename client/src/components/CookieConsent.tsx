@@ -11,36 +11,22 @@ export default function CookieConsent() {
     }
   }, []);
 
-  const accept = () => {
-    localStorage.setItem("cookie-consent", "accepted");
-    setVisible(false);
-  };
-
-  const decline = () => {
-    localStorage.setItem("cookie-consent", "declined");
-    setVisible(false);
-  };
+  const accept = () => { localStorage.setItem("cookie-consent", "accepted"); setVisible(false); };
+  const decline = () => { localStorage.setItem("cookie-consent", "declined"); setVisible(false); };
 
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-liberty/95 backdrop-blur-sm border-t border-white/10">
-      <div className="container flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p className="text-sm text-white/80">
-          We use cookies to improve your experience. No tracking, no ads — just
-          analytics to make the content better.
+    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:bottom-6 md:max-w-md z-50 animate-in slide-in-from-bottom-4 duration-500">
+      <div className="bg-liberty/95 backdrop-blur-md rounded-2xl shadow-2xl p-5 border border-white/10">
+        <p className="text-sm text-white/80 leading-relaxed mb-4">
+          We use minimal cookies for analytics only. No tracking, no ads — just data to improve the content.
         </p>
         <div className="flex items-center gap-3">
-          <button
-            onClick={decline}
-            className="text-sm text-white/50 hover:text-white/80 transition-colors"
-          >
+          <button onClick={decline} className="text-sm text-white/50 hover:text-white/80 transition-colors px-3 py-2">
             Decline
           </button>
-          <button
-            onClick={accept}
-            className="px-4 py-2 text-sm font-medium bg-health text-white rounded-md hover:bg-health-dark transition-colors"
-          >
+          <button onClick={accept} className="flex-1 px-5 py-2.5 text-sm font-semibold bg-health text-white rounded-lg hover:bg-health-dark transition-colors shadow-md">
             Accept
           </button>
         </div>

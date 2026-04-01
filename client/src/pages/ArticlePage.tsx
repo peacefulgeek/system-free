@@ -6,7 +6,7 @@ import ArticleCard from "@/components/ArticleCard";
 import Newsletter from "@/components/Newsletter";
 import { getArticleBySlug, getRelatedArticles, SITE_CONFIG } from "@/data";
 import NotFound from "./NotFound";
-import { Heart, ExternalLink } from "lucide-react";
+import { Heart, ExternalLink, Clock, Calendar } from "lucide-react";
 
 const AUTHOR_PHOTO = "https://system-free.b-cdn.net/images/kalesh-author-thumb.webp";
 
@@ -46,7 +46,6 @@ export default function ArticlePage() {
     articleSection: article.categoryName,
   };
 
-  // FAQ schema if article has FAQs
   const faqSchema =
     article.faqs && article.faqs.length > 0
       ? {
@@ -55,10 +54,7 @@ export default function ArticlePage() {
           mainEntity: article.faqs.map((faq: any) => ({
             "@type": "Question",
             name: faq.q,
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: faq.a,
-            },
+            acceptedAnswer: { "@type": "Answer", text: faq.a },
           })),
         }
       : null;
@@ -76,173 +72,114 @@ export default function ArticlePage() {
         jsonLd={jsonLd}
       />
       {faqSchema && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       )}
 
       <article>
-        {/* Hero Image */}
-        <div className="w-full aspect-[21/9] md:aspect-[3/1] overflow-hidden bg-liberty/5">
+        {/* Full-bleed Hero with overlay */}
+        <div className="relative w-full aspect-[21/9] md:aspect-[3/1] overflow-hidden">
           <img
             src={article.heroImage}
             alt={article.title}
             className="w-full h-full object-cover"
             loading="eager"
           />
-        </div>
-
-        {/* Article Header */}
-        <div className="container">
-          <div className="max-w-[720px] mx-auto py-10">
-            <div className="flex items-center gap-3 mb-4">
-              <Link
-                href={`/category/${article.category}`}
-                className="text-xs font-semibold uppercase tracking-widest text-health hover:text-health-dark transition-colors no-underline"
-              >
-                {article.categoryName}
-              </Link>
-              <span className="text-xs text-muted-foreground">
-                {article.dateHuman}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {article.readingTime} min read
-              </span>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+            <div className="container">
+              <div className="max-w-[720px]">
+                <Link
+                  href={`/category/${article.category}`}
+                  className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-amber mb-3 no-underline hover:text-white transition-colors"
+                >
+                  {article.categoryName}
+                </Link>
+                <h1 className="text-white text-2xl md:text-4xl lg:text-5xl leading-[1.1] mb-3" style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}>
+                  {article.title}
+                </h1>
+                <div className="flex items-center gap-4 text-white/60 text-sm">
+                  <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {article.dateHuman}</span>
+                  <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {article.readingTime} min read</span>
+                </div>
+              </div>
             </div>
-            <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl text-liberty leading-[1.1] mb-4">
-              {article.title}
-            </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              {article.description}
-            </p>
           </div>
         </div>
 
         {/* Main Content Area with Sidebar */}
-        <div className="container">
-          <div className="max-w-[1000px] mx-auto flex flex-col lg:flex-row gap-10">
+        <div className="container py-10 md:py-14">
+          <div className="max-w-[1000px] mx-auto flex flex-col lg:flex-row gap-12">
             {/* Article Body */}
             <div className="flex-1 min-w-0">
-              {/* Affiliate Disclosure Box (only for articles with Amazon links) */}
+              {/* Description */}
+              <p className="text-xl text-muted-foreground leading-relaxed mb-8 pb-8 border-b border-border/50" style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}>
+                {article.description}
+              </p>
+
+              {/* Affiliate Disclosure */}
               {hasAffiliateLink && (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-8 text-sm text-amber-900">
-                  This article contains affiliate links. We may earn a small
-                  commission at no extra cost to you.
+                <div className="bg-amber/10 border border-amber/30 rounded-xl px-5 py-3.5 mb-8 text-sm text-foreground/70">
+                  <strong className="text-foreground">Disclosure:</strong> This article contains affiliate links. We may earn a small commission at no extra cost to you.
                 </div>
               )}
 
-              <div
-                className="article-prose pb-8"
-                dangerouslySetInnerHTML={{ __html: article.body }}
-              />
+              <div className="article-prose pb-8" dangerouslySetInnerHTML={{ __html: article.body }} />
 
               {/* Health Disclaimer Card */}
-              <div className="bg-cream-dark border border-border rounded-xl p-6 mb-8">
+              <div className="bg-gradient-to-br from-cream-dark to-cream border border-border/50 rounded-xl p-6 mb-8">
                 <div className="flex items-start gap-3">
-                  <Heart className="w-5 h-5 text-health flex-shrink-0 mt-0.5" />
+                  <div className="w-10 h-10 rounded-full bg-health/10 flex items-center justify-center flex-shrink-0">
+                    <Heart className="w-5 h-5 text-health" />
+                  </div>
                   <div>
-                    <h4 className="font-serif text-base text-liberty mb-2">
-                      Health Information Disclaimer
-                    </h4>
-                    <p className="text-sm text-foreground/70 leading-relaxed">
-                      This article is for educational purposes only and does not
-                      constitute medical advice. The information presented here
-                      reflects research and personal perspective — it is not a
-                      substitute for professional medical consultation. Always
-                      consult a qualified healthcare provider before making
-                      changes to your health regimen or discontinuing any
-                      treatment. Your health decisions should be made in
-                      partnership with professionals who understand your
-                      individual circumstances.
+                    <h4 className="text-base text-liberty mb-2" style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}>Health Information Disclaimer</h4>
+                    <p className="text-sm text-foreground/60 leading-relaxed">
+                      This article is for educational purposes only and does not constitute medical advice. Always consult a qualified healthcare provider before making changes to your health regimen. Your health decisions should be made in partnership with professionals who understand your individual circumstances.
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* Author Box */}
-              <div className="py-8 border-t border-border">
-                <div className="flex items-start gap-4">
-                  <img
-                    src={AUTHOR_PHOTO}
-                    alt="Kalesh"
-                    className="w-14 h-14 rounded-full object-cover flex-shrink-0"
-                    loading="lazy"
-                  />
+              <div className="py-8 border-t border-border/50">
+                <div className="flex items-start gap-5">
+                  <img src={AUTHOR_PHOTO} alt="Kalesh" className="w-16 h-16 rounded-full object-cover flex-shrink-0 ring-2 ring-health/20" loading="lazy" />
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-widest text-health mb-1">
-                      Written by
-                    </p>
-                    <a
-                      href={SITE_CONFIG.authorLink}
-                      className="font-serif text-xl text-liberty hover:text-health transition-colors no-underline"
-                      target="_blank"
-                      rel="noopener"
-                    >
+                    <p className="text-xs font-bold uppercase tracking-[0.15em] text-health mb-1">Written by</p>
+                    <a href={SITE_CONFIG.authorLink} className="text-xl text-liberty hover:text-health transition-colors no-underline" style={{ fontFamily: "'Instrument Serif', Georgia, serif" }} target="_blank" rel="noopener">
                       {SITE_CONFIG.author}
                     </a>
-                    <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                      {SITE_CONFIG.authorTitle}. Exploring the intersection of
-                      consciousness, healthcare sovereignty, and the clarity that
-                      comes from questioning what the system taught you to accept.
+                    <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+                      {SITE_CONFIG.authorTitle}. Exploring the intersection of consciousness, healthcare sovereignty, and the clarity that comes from questioning what the system taught you to accept.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Sidebar — Kalesh Bio */}
+            {/* Sidebar */}
             <aside className="lg:w-[280px] flex-shrink-0">
               <div className="lg:sticky lg:top-24 space-y-6">
                 {/* Author Card */}
-                <div className="bg-white border border-border rounded-xl p-6 text-center">
-                  <img
-                    src={AUTHOR_PHOTO}
-                    alt="Kalesh"
-                    className="w-20 h-20 rounded-full object-cover mx-auto mb-4"
-                    loading="lazy"
-                  />
-                  <h3 className="font-serif text-lg text-liberty mb-1">
-                    Kalesh
-                  </h3>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    Consciousness Teacher & Writer
+                <div className="rich-card p-6 text-center">
+                  <img src={AUTHOR_PHOTO} alt="Kalesh" className="w-20 h-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-health/20" loading="lazy" />
+                  <h3 className="text-lg text-liberty mb-1" style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}>Kalesh</h3>
+                  <p className="text-xs text-muted-foreground mb-3">Consciousness Teacher & Writer</p>
+                  <p className="text-sm text-foreground/60 leading-relaxed mb-5">
+                    Guiding seekers toward clarity, sovereignty, and the kind of health freedom that begins with awareness.
                   </p>
-                  <p className="text-sm text-foreground/60 leading-relaxed mb-4">
-                    Guiding seekers toward clarity, sovereignty, and the kind of
-                    health freedom that begins with awareness.
-                  </p>
-                  <a
-                    href="https://kalesh.love"
-                    target="_blank"
-                    rel="noopener"
-                    className="block w-full bg-health text-white text-sm font-medium py-2.5 rounded-lg hover:bg-health-dark transition-colors no-underline mb-2"
-                  >
-                    Visit Kalesh's Website
-                  </a>
-                  <a
-                    href="https://kalesh.love"
-                    target="_blank"
-                    rel="noopener"
-                    className="block w-full border border-liberty text-liberty text-sm font-medium py-2.5 rounded-lg hover:bg-liberty hover:text-white transition-colors no-underline"
-                  >
-                    Book a Session
+                  <a href="https://kalesh.love" target="_blank" rel="noopener" className="block w-full bg-health text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-health-dark transition-colors no-underline mb-2">
+                    Visit kalesh.love
                   </a>
                 </div>
 
-                {/* Tools Recommendation */}
-                <div className="bg-cream-dark border border-border rounded-xl p-5">
-                  <h4 className="font-serif text-base text-liberty mb-2">
-                    Recommended Tools
-                  </h4>
+                {/* Tools Card */}
+                <div className="rich-card p-5">
+                  <h4 className="text-base text-liberty mb-2" style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}>Recommended Tools</h4>
                   <p className="text-sm text-foreground/60 leading-relaxed mb-3">
-                    Curated books, devices, and resources for your health
-                    sovereignty journey.
+                    Curated books, devices, and resources for your health sovereignty journey.
                   </p>
-                  <Link
-                    href="/tools"
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-health hover:text-health-dark transition-colors no-underline"
-                  >
+                  <Link href="/tools" className="inline-flex items-center gap-1.5 text-sm font-semibold text-health hover:text-health-dark transition-colors no-underline">
                     Browse Tools <ExternalLink className="w-3.5 h-3.5" />
                   </Link>
                 </div>
@@ -254,14 +191,14 @@ export default function ArticlePage() {
 
       {/* Related Articles */}
       {related.length > 0 && (
-        <section className="container py-12">
-          <h2 className="font-serif text-2xl text-liberty mb-8">
-            Keep Reading
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {related.map((a) => (
-              <ArticleCard key={a.id} article={a} />
-            ))}
+        <section className="py-12 md:py-16 bg-cream-dark">
+          <div className="container">
+            <h2 className="text-liberty text-2xl mb-8" style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}>Keep Reading</h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              {related.map((a) => (
+                <ArticleCard key={a.id} article={a} />
+              ))}
+            </div>
           </div>
         </section>
       )}
