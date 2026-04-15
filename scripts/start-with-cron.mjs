@@ -22,6 +22,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT = join(__dirname, "..");
 
+// ─── Auto-gen master switch ─────────────────────────────────────────────────
+// Set to true to enable all automated publishing, humanization, and spotlight crons.
+// Set to false to run the server only (no automated content changes).
+const AUTO_GEN_ENABLED = true;
+
 // ─── Start the Express server ───────────────────────────────────────────────
 console.log("[cron] Starting Express server...");
 const server = spawn("node", [join(ROOT, "dist", "index.js")], {
@@ -252,31 +257,36 @@ function productSpotlight() {
 }
 
 // ─── Schedule ───────────────────────────────────────────────────────────────
-// Run immediately on startup (with delay for server to start)
-setTimeout(() => {
-  runAutoPublish();
-  runHumanizationCheck();
-  productSpotlight();
-}, 5000);
+if (AUTO_GEN_ENABLED) {
+  // Run immediately on startup (with delay for server to start)
+  setTimeout(() => {
+    runAutoPublish();
+    runHumanizationCheck();
+    productSpotlight();
+  }, 5000);
 
-// Auto-publish: every 6 hours
-const SIX_HOURS = 6 * 60 * 60 * 1000;
-setInterval(runAutoPublish, SIX_HOURS);
+  // Auto-publish: every 6 hours
+  const SIX_HOURS = 6 * 60 * 60 * 1000;
+  setInterval(runAutoPublish, SIX_HOURS);
 
-// Humanization check: every 12 hours
-const TWELVE_HOURS = 12 * 60 * 60 * 1000;
-setInterval(runHumanizationCheck, TWELVE_HOURS);
+  // Humanization check: every 12 hours
+  const TWELVE_HOURS = 12 * 60 * 60 * 1000;
+  setInterval(runHumanizationCheck, TWELVE_HOURS);
 
-// Product spotlight: weekly
-const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
-setInterval(productSpotlight, ONE_WEEK);
+  // Product spotlight: weekly
+  const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+  setInterval(productSpotlight, ONE_WEEK);
 
-console.log("[cron] Schedules active:");
-console.log("  - Auto-publish: every 6 hours");
-console.log("  - Humanization check: every 12 hours");
-console.log("  - Product spotlight: weekly");
-console.log("  - Phase 1: 5 articles/day (staggered dateISO)");
-console.log("  - Phase 2: After all 300 live, weekly refresh");
+  console.log("[cron] AUTO_GEN_ENABLED = true");
+  console.log("[cron] Schedules active:");
+  console.log("  - Auto-publish: every 6 hours");
+  console.log("  - Humanization check: every 12 hours");
+  console.log("  - Product spotlight: weekly");
+  console.log("  - Phase 1: 5 articles/day (staggered dateISO)");
+  console.log("  - Phase 2: After all 300 live, weekly refresh");
+} else {
+  console.log("[cron] AUTO_GEN_ENABLED = false — server only, no automated crons");
+}
 
 // ─── Graceful shutdown ──────────────────────────────────────────────────────
 process.on("SIGTERM", () => {
