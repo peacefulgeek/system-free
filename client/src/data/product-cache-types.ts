@@ -7,7 +7,7 @@
  */
 
 export interface CachedProduct {
-  title: string;
+  title: string | null;
   price: string | null;       // e.g. "$13.14" or null if not found
   availability: "in-stock" | "unavailable" | "unknown";
   lastChecked: string;         // ISO date string
