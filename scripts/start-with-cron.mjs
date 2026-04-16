@@ -319,6 +319,134 @@ function productSpotlight() {
   console.log(`[cron] Product Spotlight this week: ${current}`);
 }
 
+// ─── Product Freshness Checker ────────────────────────────────────────────
+// Checks every ASIN in articles against Amazon. If a product page returns
+// 404 or "Page not found", it auto-swaps the dead ASIN with a working
+// alternative from the catalog. Runs weekly. Pure in-code, no external deps.
+
+// Backup ASINs — verified working, grouped by topic for smart replacement
+const BACKUP_ASINS = [
+  { asin: "1635574110", name: "The Price We Pay", tags: ["medical", "billing", "hospital", "cost"] },
+  { asin: "0143110853", name: "An American Sickness", tags: ["healthcare", "insurance", "system"] },
+  { asin: "0593190009", name: "Never Pay the First Bill", tags: ["debt", "billing", "negotiate"] },
+  { asin: "0143115766", name: "Your Money or Your Life", tags: ["financial", "money", "budget"] },
+  { asin: "1595555277", name: "Total Money Makeover", tags: ["debt", "budget", "financial"] },
+  { asin: "0735213615", name: "Atomic Habits", tags: ["habits", "change", "routine"] },
+  { asin: "1501144324", name: "10% Happier", tags: ["mindfulness", "meditation", "stress"] },
+  { asin: "0062515675", name: "Food Fix", tags: ["food", "nutrition", "diet"] },
+  { asin: "0062316117", name: "Sapiens", tags: ["health", "evolution", "body"] },
+  { asin: "B07PWYGRVG", name: "Blood Pressure Monitor", tags: ["blood pressure", "heart", "device"] },
+  { asin: "B0BQ3B3YBN", name: "Berberine Supplement", tags: ["supplement", "blood sugar", "metabolism"] },
+  { asin: "B0D57PP7G3", name: "Wellness Journal", tags: ["journal", "writing", "reflection"] },
+  { asin: "0399590528", name: "Breath by James Nestor", tags: ["breathing", "health", "body"] },
+  { asin: "0062457713", name: "The Wahls Protocol", tags: ["autoimmune", "diet", "healing"] },
+  { asin: "0316387800", name: "Why We Sleep", tags: ["sleep", "health", "brain"] },
+  { asin: "0544609719", name: "Being Mortal", tags: ["aging", "end of life", "medical"] },
+  { asin: "0062656244", name: "How Not to Die", tags: ["nutrition", "disease", "prevention"] },
+  { asin: "1250127572", name: "Genius Foods", tags: ["brain", "nutrition", "cognitive"] },
+  { asin: "0062349481", name: "The Body Keeps the Score", tags: ["trauma", "healing", "mental health"] },
+  { asin: "0307352153", name: "Born to Run", tags: ["exercise", "running", "fitness"] },
+];
+
+async function checkAsinFreshness(asin) {
+  try {
+    const url = `https://www.amazon.com/dp/${asin}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    const res = await fetch(url, {
+      method: "HEAD",
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
+      redirect: "follow",
+    });
+    clearTimeout(timeout);
+    // 404 = dead product. 503 = Amazon anti-bot (product likely fine).
+    // 200/301/302 = alive.
+    if (res.status === 404) return "dead";
+    if (res.status === 503) return "blocked"; // anti-bot, assume alive
+    return "alive";
+  } catch (e) {
+    return "error"; // network timeout, assume alive
+  }
+}
+
+async function runProductFreshnessCheck() {
+  console.log(`\n[cron] Product freshness check starting...`);
+
+  const dataPath = join(ROOT, "client", "src", "data", "articles.json");
+  if (!existsSync(dataPath)) return;
+
+  const data = JSON.parse(readFileSync(dataPath, "utf-8"));
+  const articles = data.articles;
+
+  // Collect all unique ASINs from articles
+  const asinSet = new Set();
+  for (const art of articles) {
+    const matches = art.body.match(/amazon\.com\/dp\/([A-Z0-9]{10})/g) || [];
+    for (const m of matches) {
+      asinSet.add(m.replace("amazon.com/dp/", ""));
+    }
+  }
+
+  const allAsins = [...asinSet];
+  console.log(`[cron] Checking ${allAsins.length} unique ASINs...`);
+
+  // Check each ASIN with a small delay to avoid rate limiting
+  const deadAsins = [];
+  for (let i = 0; i < allAsins.length; i++) {
+    const asin = allAsins[i];
+    const status = await checkAsinFreshness(asin);
+    if (status === "dead") {
+      deadAsins.push(asin);
+      console.log(`[cron] DEAD ASIN: ${asin}`);
+    }
+    // Small delay between checks to be respectful
+    if (i < allAsins.length - 1) {
+      await new Promise(r => setTimeout(r, 2000));
+    }
+  }
+
+  if (deadAsins.length === 0) {
+    console.log(`[cron] All ${allAsins.length} ASINs are alive. No replacements needed.`);
+    return;
+  }
+
+  console.log(`[cron] Found ${deadAsins.length} dead ASINs. Replacing...`);
+
+  // For each dead ASIN, find a backup that isn't already used
+  const usedAsins = new Set(allAsins);
+  let totalSwaps = 0;
+
+  for (const deadAsin of deadAsins) {
+    // Find a backup ASIN not already in use
+    const backup = BACKUP_ASINS.find(b => !usedAsins.has(b.asin));
+    if (!backup) {
+      console.log(`[cron] No backup available for ${deadAsin}, skipping`);
+      continue;
+    }
+
+    // Replace in all articles
+    let swapCount = 0;
+    for (const art of articles) {
+      if (art.body.includes(deadAsin)) {
+        art.body = art.body.split(deadAsin).join(backup.asin);
+        swapCount++;
+      }
+    }
+
+    usedAsins.add(backup.asin);
+    totalSwaps += swapCount;
+    console.log(`[cron] Replaced ${deadAsin} -> ${backup.asin} (${backup.name}) in ${swapCount} articles`);
+  }
+
+  if (totalSwaps > 0) {
+    writeFileSync(dataPath, JSON.stringify(data));
+    console.log(`[cron] Product freshness: ${totalSwaps} total ASIN swaps across articles`);
+  }
+}
+
 // ─── Schedule ───────────────────────────────────────────────────────────────
 if (AUTO_GEN_ENABLED) {
   // Run immediately on startup (with delay for server to start)
@@ -340,11 +468,18 @@ if (AUTO_GEN_ENABLED) {
   const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
   setInterval(productSpotlight, ONE_WEEK);
 
+  // Product freshness check: weekly (offset by 3 days from spotlight)
+  setTimeout(() => {
+    runProductFreshnessCheck();
+    setInterval(runProductFreshnessCheck, ONE_WEEK);
+  }, 3 * 24 * 60 * 60 * 1000); // First run after 3 days, then weekly
+
   console.log("[cron] AUTO_GEN_ENABLED = true");
   console.log("[cron] Schedules active:");
   console.log("  - Auto-publish: every 6 hours");
   console.log("  - Humanization check: every 12 hours");
   console.log("  - Product spotlight: weekly");
+  console.log("  - Product freshness check: weekly (offset 3 days)");
   console.log("  - Phase 1: 5 articles/day (staggered dateISO)");
   console.log("  - Phase 2: After all 300 live, weekly refresh");
 } else {
