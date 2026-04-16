@@ -447,6 +447,243 @@ async function runProductFreshnessCheck() {
   }
 }
 
+// ─── Product Metadata Refresh ─────────────────────────────────────────────
+// Fetches actual product titles, prices, and availability from Amazon.
+// Updates product-cache.json so the frontend can display current data.
+// Runs weekly. Processes ASINs in batches with delays to avoid rate limiting.
+
+const PRODUCT_CACHE_PATH = join(ROOT, "client", "src", "data", "product-cache.json");
+
+// Rotating User-Agent strings to reduce detection
+const USER_AGENTS = [
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15",
+  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+];
+
+function randomUA() {
+  return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+}
+
+/**
+ * Fetch product metadata from a single Amazon product page.
+ * Extracts title, price, and availability using HTML parsing.
+ * Returns null if the fetch fails or gets blocked.
+ */
+async function fetchProductMeta(asin) {
+  try {
+    const url = `https://www.amazon.com/dp/${asin}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "User-Agent": randomUA(),
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+      redirect: "follow",
+    });
+    clearTimeout(timeout);
+
+    if (res.status === 404) {
+      return { title: null, price: null, availability: "unavailable", status: "dead" };
+    }
+    if (res.status === 503) {
+      return null; // anti-bot block, skip this ASIN
+    }
+
+    const html = await res.text();
+
+    // Extract title from <span id="productTitle">
+    let title = null;
+    const titleMatch = html.match(/id=["']productTitle["'][^>]*>([^<]+)/);
+    if (titleMatch) {
+      title = titleMatch[1].trim()
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+    }
+
+    // Extract price — try priceAmount JSON first, then dollar regex
+    let price = null;
+    const priceAmountMatch = html.match(/"priceAmount":"?(\d+\.?\d*)/);
+    if (priceAmountMatch) {
+      price = "$" + parseFloat(priceAmountMatch[1]).toFixed(2);
+    } else {
+      const dollarMatch = html.match(/\$(\d+\.\d{2})/);
+      if (dollarMatch) {
+        price = "$" + dollarMatch[1];
+      }
+    }
+
+    // Extract availability
+    let availability = "unknown";
+    const availDiv = html.match(/id="availability"[\s\S]{0,500}/);
+    if (availDiv) {
+      const availText = availDiv[0];
+      if (availText.includes("In Stock") || availText.includes("in stock")) {
+        availability = "in-stock";
+      } else if (availText.includes("Currently unavailable") || availText.includes("currently unavailable")) {
+        availability = "unavailable";
+      }
+    }
+    // Fallback: check for Add to Cart button
+    if (availability === "unknown") {
+      if (html.includes("add-to-cart-button") || html.includes("Add to Cart")) {
+        availability = "in-stock";
+      }
+    }
+
+    return { title, price, availability, status: "ok" };
+  } catch (e) {
+    return null; // network error, skip
+  }
+}
+
+/**
+ * Collect all unique ASINs from articles.json, product-catalog.ts references,
+ * and the Tools page hardcoded ASINs.
+ */
+function collectAllAsins() {
+  const asinSet = new Set();
+
+  // From articles.json
+  const dataPath = join(ROOT, "client", "src", "data", "articles.json");
+  if (existsSync(dataPath)) {
+    const data = JSON.parse(readFileSync(dataPath, "utf-8"));
+    for (const art of data.articles) {
+      const matches = art.body.match(/amazon\.com\/dp\/([A-Z0-9]{10})/g) || [];
+      for (const m of matches) {
+        asinSet.add(m.replace("amazon.com/dp/", ""));
+      }
+    }
+  }
+
+  // From product-catalog.ts (read as text, extract ASINs)
+  const catalogPath = join(ROOT, "client", "src", "data", "product-catalog.ts");
+  if (existsSync(catalogPath)) {
+    const catalogText = readFileSync(catalogPath, "utf-8");
+    const catalogMatches = catalogText.match(/asin:\s*"([A-Z0-9]{10})"/g) || [];
+    for (const m of catalogMatches) {
+      const asin = m.match(/"([A-Z0-9]{10})"/)[1];
+      asinSet.add(asin);
+    }
+  }
+
+  // From Tools.tsx (read as text, extract ASINs)
+  const toolsPath = join(ROOT, "client", "src", "pages", "Tools.tsx");
+  if (existsSync(toolsPath)) {
+    const toolsText = readFileSync(toolsPath, "utf-8");
+    const toolsMatches = toolsText.match(/asin:\s*"([A-Z0-9]{10})"/g) || [];
+    for (const m of toolsMatches) {
+      const asin = m.match(/"([A-Z0-9]{10})"/)[1];
+      asinSet.add(asin);
+    }
+  }
+
+  // From backup ASINs
+  for (const b of BACKUP_ASINS) {
+    asinSet.add(b.asin);
+  }
+
+  return [...asinSet];
+}
+
+/**
+ * Main product metadata refresh function.
+ * Fetches metadata for all ASINs, updates product-cache.json.
+ * Processes in batches of 5 with 3-5 second delays between requests.
+ */
+async function runProductMetaRefresh() {
+  console.log(`\n[cron] Product metadata refresh starting...`);
+
+  // Load existing cache
+  let cache = { lastFullRefresh: null, products: {} };
+  if (existsSync(PRODUCT_CACHE_PATH)) {
+    try {
+      cache = JSON.parse(readFileSync(PRODUCT_CACHE_PATH, "utf-8"));
+    } catch (e) {
+      console.log("[cron] Cache file corrupt, starting fresh");
+    }
+  }
+
+  const allAsins = collectAllAsins();
+  console.log(`[cron] Found ${allAsins.length} unique ASINs to refresh`);
+
+  let updated = 0;
+  let failed = 0;
+  let priceChanges = 0;
+  let titleChanges = 0;
+  let availChanges = 0;
+
+  // Process ASINs with delays to avoid rate limiting
+  for (let i = 0; i < allAsins.length; i++) {
+    const asin = allAsins[i];
+    const meta = await fetchProductMeta(asin);
+
+    if (meta === null) {
+      failed++;
+      // Keep existing cache entry if we have one
+      if (i % 20 === 0) {
+        console.log(`[cron] Progress: ${i + 1}/${allAsins.length} (${updated} updated, ${failed} skipped)`);
+      }
+    } else {
+      const existing = cache.products[asin];
+
+      // Track changes
+      if (existing) {
+        if (meta.price && existing.price && meta.price !== existing.price) {
+          priceChanges++;
+          console.log(`[cron] Price change ${asin}: ${existing.price} -> ${meta.price}`);
+        }
+        if (meta.title && existing.title && meta.title !== existing.title) {
+          titleChanges++;
+        }
+        if (meta.availability !== existing.availability) {
+          availChanges++;
+          console.log(`[cron] Availability change ${asin}: ${existing.availability} -> ${meta.availability}`);
+        }
+      }
+
+      // Update cache entry
+      cache.products[asin] = {
+        title: meta.title || (existing ? existing.title : null),
+        price: meta.price || (existing ? existing.price : null),
+        availability: meta.availability || "unknown",
+        lastChecked: new Date().toISOString(),
+      };
+      updated++;
+    }
+
+    // Random delay between 2-5 seconds to avoid rate limiting
+    if (i < allAsins.length - 1) {
+      const delay = 2000 + Math.random() * 3000;
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+
+  // Update refresh timestamp
+  cache.lastFullRefresh = new Date().toISOString();
+
+  // Write updated cache
+  writeFileSync(PRODUCT_CACHE_PATH, JSON.stringify(cache, null, 2));
+
+  console.log(`[cron] Product metadata refresh complete:`);
+  console.log(`  - Total ASINs: ${allAsins.length}`);
+  console.log(`  - Updated: ${updated}`);
+  console.log(`  - Failed/skipped: ${failed}`);
+  console.log(`  - Price changes: ${priceChanges}`);
+  console.log(`  - Title changes: ${titleChanges}`);
+  console.log(`  - Availability changes: ${availChanges}`);
+  console.log(`  - Cache size: ${Object.keys(cache.products).length} products`);
+}
+
 // ─── Schedule ───────────────────────────────────────────────────────────────
 if (AUTO_GEN_ENABLED) {
   // Run immediately on startup (with delay for server to start)
@@ -474,12 +711,20 @@ if (AUTO_GEN_ENABLED) {
     setInterval(runProductFreshnessCheck, ONE_WEEK);
   }, 3 * 24 * 60 * 60 * 1000); // First run after 3 days, then weekly
 
+  // Product metadata refresh: weekly (offset by 5 days from spotlight)
+  // Fetches titles, prices, availability from Amazon and updates product-cache.json
+  setTimeout(() => {
+    runProductMetaRefresh();
+    setInterval(runProductMetaRefresh, ONE_WEEK);
+  }, 5 * 24 * 60 * 60 * 1000); // First run after 5 days, then weekly
+
   console.log("[cron] AUTO_GEN_ENABLED = true");
   console.log("[cron] Schedules active:");
   console.log("  - Auto-publish: every 6 hours");
   console.log("  - Humanization check: every 12 hours");
   console.log("  - Product spotlight: weekly");
   console.log("  - Product freshness check: weekly (offset 3 days)");
+  console.log("  - Product metadata refresh: weekly (offset 5 days)");
   console.log("  - Phase 1: 5 articles/day (staggered dateISO)");
   console.log("  - Phase 2: After all 300 live, weekly refresh");
 } else {

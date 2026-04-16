@@ -1,0 +1,731 @@
+{
+  "lastFullRefresh": "2026-04-16T15:25:23.646Z",
+  "products": {
+    "1250066115": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:21.246Z"
+    },
+    "1250076226": {
+      "title": "Being Mortal",
+      "price": "$10.44",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:23:51.106Z"
+    },
+    "1250113822": {
+      "title": "Deep Nutrition: Why Your Genes Need Traditional Food",
+      "price": "$15.37",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:25.631Z"
+    },
+    "1250193192": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:23:55.194Z"
+    },
+    "1401307787": {
+      "title": "Wherever You Go, There You Are: Mindfulness Meditation in Everyday Life",
+      "price": "$5.36",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:12.399Z"
+    },
+    "1439195463": {
+      "title": "Why Buddhism is True: The Science and Philosophy of Meditation and Enlightenment",
+      "price": "$10.59",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:12.399Z"
+    },
+    "1451636024": {
+      "title": "Waking Up: A Guide to Spirituality Without Religion",
+      "price": "$10.28",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:08.165Z"
+    },
+    "1451694970": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:25:15.070Z"
+    },
+    "1455587982": {
+      "title": "The Telomere Effect: A Revolutionary Approach to Living Younger, Healthier, Longer",
+      "price": "$10.46",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:25:15.070Z"
+    },
+    "1501144324": {
+      "title": "Why We Sleep: Unlocking the Power of Sleep and Dreams",
+      "price": "$10.09",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:25:19.458Z"
+    },
+    "1501156985": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:12.399Z"
+    },
+    "1501191977": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:25:15.070Z"
+    },
+    "1523505745": {
+      "title": "I Will Teach You to Be Rich: No Guilt. No Excuses. Just a 6-Week Program That Works (Second Edition)",
+      "price": "$10.17",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:03.662Z"
+    },
+    "1533667926": {
+      "title": "The Simple Path to Wealth: Your road map to financial independence and a rich, free life",
+      "price": "$35.66",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:03.662Z"
+    },
+    "1572245379": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:12.399Z"
+    },
+    "1573245380": {
+      "title": "The Book of Awakening: Having the Life You Want by Being Present to the Life You Have",
+      "price": "$63.89",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:16.934Z"
+    },
+    "1577314808": {
+      "title": "The Power of Now: A Guide to Spiritual Enlightenment",
+      "price": "$13.34",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:08.165Z"
+    },
+    "1583335544": {
+      "title": "The Wahls Protocol: A Radical New Way to Treat All Chronic Autoimmune Conditions Using Paleo Principles",
+      "price": "$9.52",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:25.631Z"
+    },
+    "1595555277": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:03.662Z"
+    },
+    "1616209488": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:23:59.315Z"
+    },
+    "1628600012": {
+      "title": "The Complete Guide to Fasting: Heal Your Body Through Intermittent, Alternate-Day, and Extended Fasting",
+      "price": "$13.81",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:21.246Z"
+    },
+    "1632868318": {
+      "title": "Lost Connections",
+      "price": "$11.45",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:21.246Z"
+    },
+    "1635574110": {
+      "title": "The Price We Pay: What Broke American Health Care--and How to Fix It",
+      "price": "$13.14",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:23:51.106Z"
+    },
+    "1642937851": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:23:55.194Z"
+    },
+    "1683644093": {
+      "title": "The Wim Hof Method: Activate Your Full Human Potential",
+      "price": "$25.67",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:25:19.458Z"
+    },
+    "1732403805": {
+      "title": "Direct Primary Care: The Cure for Our Broken Healthcare System",
+      "price": "$9.95",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:23:51.106Z"
+    },
+    "1771641258": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:21.246Z"
+    },
+    "1942121105": {
+      "title": "The Contentment Journal",
+      "price": "$18.02",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:08.165Z"
+    },
+    "1948647044": {
+      "title": "Unprofitable Schooling: Examining Causes of, and Fixes for, America's Broken Ivory Tower",
+      "price": "$15.10",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:23:55.194Z"
+    },
+    "0143110853": {
+      "title": "An American Sickness: How Healthcare Became Big Business and How You Can Take It Back",
+      "price": "$12.93",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:23:51.106Z"
+    },
+    "0593190009": {
+      "title": "Never Pay the First Bill: And Other Ways to Fight the Health Care System and Win",
+      "price": "$14.61",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:23:51.106Z"
+    },
+    "0451495527": {
+      "title": "The Healing Self: A Revolutionary New Plan to Supercharge Your Immunity and Stay Well for Life",
+      "price": "$19.21",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:23:55.194Z"
+    },
+    "0465054749": {
+      "title": "The Patient Will See You Now: The Future of Medicine is in Your Hands",
+      "price": "$18.70",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:23:55.194Z"
+    },
+    "0374535337": {
+      "title": "Doctored: The Disillusionment of an American Physician",
+      "price": "$10.45",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:23:59.315Z"
+    },
+    "0425238091": {
+      "title": "The House of God",
+      "price": "$13.50",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:23:59.315Z"
+    },
+    "0307452425": {
+      "title": "Anatomy of an Epidemic: Magic Bullets, Psychiatric Drugs, and the Astonishing Rise of Mental Illness in America",
+      "price": "$12.28",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:23:59.315Z"
+    },
+    "0865478007": {
+      "title": "Bad Pharma: How Drug Companies Mislead Doctors and Harm Patients",
+      "price": "$28.00",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:23:59.315Z"
+    },
+    "0143115766": {
+      "title": "Your Money or Your Life: 9 Steps to Transforming Your Relationship with Money and Achieving Financial Independence: Fully Revised and Updated for 2018",
+      "price": "$13.90",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:03.662Z"
+    },
+    "0143130404": {
+      "title": "Broke Millennial: Stop Scraping By and Get Your Financial Life Together (Broke Millennial Series)",
+      "price": "$11.61",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:03.662Z"
+    },
+    "0451205367": {
+      "title": "The Richest Man in Babylon",
+      "price": "$6.20",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:08.165Z"
+    },
+    "B0CJXGJ5WN": {
+      "title": "Vintage Stripes Fairlawn OH Premium T-Shirt",
+      "price": "$21.99",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:08.165Z"
+    },
+    "0553380990": {
+      "title": "Radical Acceptance: Embracing Your Life With the Heart of a Buddha",
+      "price": "$8.87",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:12.399Z"
+    },
+    "0062917609": {
+      "title": "10% Happier Revised Edition: How I Tamed the Voice in My Head, Reduced Stress Without Losing My Edge, and Found Self-Help That Actually Works--A True Story",
+      "price": "$10.90",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:16.934Z"
+    },
+    "0735213615": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:16.934Z"
+    },
+    "0143127748": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:16.934Z"
+    },
+    "155643880X": {
+      "title": "In the Realm of Hungry Ghosts: Close Encounters with Addiction",
+      "price": "$14.83",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:16.934Z"
+    },
+    "0316453188": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:21.246Z"
+    },
+    "0143114964": {
+      "title": "In Defense of Food: An Eater's Manifesto",
+      "price": "$4.17",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:25.631Z"
+    },
+    "0063027720": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:24:25.631Z"
+    },
+    "0062562851": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:25.631Z"
+    },
+    "0316234800": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:29.534Z"
+    },
+    "B071XW4C5Q": {
+      "title": "WITHINGS Body Smart - Accurate Scale for Body Weight and Fat Percentage, Body Composition Wi-Fi and Bluetooth Weight Scale, Baby Weight Scale, Smart Scale Apple Health Compatible, Bathroom Scale",
+      "price": "$129.95",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:29.534Z"
+    },
+    "B0CSRF8JGG": {
+      "title": "Oura Ring Gen3 Heritage - Black - Size 6 - Smart Ring - Size First with Oura Ring Gen3 Sizing Kit - Sleep Tracking Wearable - Heart Rate - Fitness Tracker - 5-7 Days Battery Life",
+      "price": "$199.00",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:29.534Z"
+    },
+    "B008H4SLV6": {
+      "title": "Vitamix 5200 Professional Grade Blender for Smoothies, Food Grinder and Emulsifier, 64oz Pitcher, Black",
+      "price": "$475.00",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:29.534Z"
+    },
+    "B01N9QLJGS": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:24:29.534Z"
+    },
+    "B09LHKV1YT": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:33.708Z"
+    },
+    "B0B5F9SZW7": {
+      "title": "Fitbit Inspire 3 Health &-Fitness-Tracker with Stress Management, Workout Intensity, Sleep Tracking, 24/7 Heart Rate and more, Midnight Zen/Black One Size (S & L Bands Included)",
+      "price": "$95.00",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:33.708Z"
+    },
+    "B0FGYFY5R5": {
+      "title": "Lumen Metabolism Tracker Device - Measure Real-Time Fat & Carb Burn, Daily Nutrition, Meal Plans, Metabolic Health, Weight Loss, Athletic Fitness & Performance for Men & Women w/ 12 Month Subscription",
+      "price": "$79.98",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:33.708Z"
+    },
+    "B0C9LHQKRN": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:24:33.708Z"
+    },
+    "B07G2W4Y9K": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:33.708Z"
+    },
+    "B07VVK39F7": {
+      "title": "LEVOIT Air Purifier for Home Allergens Pet Hair in Bedroom, Covers Up to 1073 ft² by 56W High Torque Motor, AHAM VERIFIDE, 3-in-1 Filter with HEPA Sleep Mode, Remove Dust Smoke Odor, Core300-P, White",
+      "price": "$84.94",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:37.783Z"
+    },
+    "B07HL2S9GQ": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:37.783Z"
+    },
+    "B086R1HBRP": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:24:37.783Z"
+    },
+    "B002CQU564": {
+      "title": "Nordic Naturals Ultimate Omega, Lemon Flavor - 180 Soft Gels - 1280 mg Omega-3 - High-Potency Fish Oil with EPA & DHA - Promotes Brain & Heart Health - Non-GMO - 90 Servings",
+      "price": "$62.32",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:37.783Z"
+    },
+    "B0CNS894RH": {
+      "title": "TheraGun Therabody Relief Handheld Percussion Massage Gun - Easy-to-Use, Comfortable & Light Personal Massager for Every Day Pain Relief Massage Therapy in Neck, Back, Leg, Shoulder and Body (Navy)",
+      "price": "$159.99",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:37.783Z"
+    },
+    "B0C3JNJPZ7": {
+      "title": "WITHINGS Body Smart - Accurate Scale for Body Weight and Fat Percentage, Body Composition Wi-Fi and Bluetooth Weight Scale, Baby Weight Scale, Smart Scale Apple Health Compatible, Bathroom Scale",
+      "price": "$129.95",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:41.843Z"
+    },
+    "B000OQ2DL4": {
+      "title": "Natural Vitality Calm, Magnesium Supplement, Anti-Stress Drink Mix Powder, Gluten Free, Vegan, & Non-GMO, Original Unflavored, 16 oz",
+      "price": "$29.98",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:41.843Z"
+    },
+    "B0013OQIJY": {
+      "title": "NOW Supplements, Ashwagandha (Withania somnifera) 450 mg (Standardized Extract), 90 Veg Capsules",
+      "price": "$7.99",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:41.843Z"
+    },
+    "B0BQ3B3YBN": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:41.843Z"
+    },
+    "B000MRGAO4": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:24:41.843Z"
+    },
+    "B001BWZG0K": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:24:43.934Z"
+    },
+    "B0013OVVK0": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:43.934Z"
+    },
+    "B00GF669L4": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:24:43.934Z"
+    },
+    "B0F1W2G4R1": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:43.934Z"
+    },
+    "B0797KFHB5": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:43.934Z"
+    },
+    "B00K6JUG4K": {
+      "title": "Vital Proteins Collagen Peptides Powder Advanced with Hyaluronic Acid & Vitamin C, 20oz Collagen Protein, Unflavored, 27 Servings",
+      "price": "$42.99",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:47.732Z"
+    },
+    "B071Z2RJMX": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:24:47.732Z"
+    },
+    "B0015BYOIC": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:47.732Z"
+    },
+    "B001IDHKGC": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:24:47.732Z"
+    },
+    "B0019GW3G8": {
+      "title": "Doctor's Best High Absorption CoQ10 with BioPerine Supplement - Coenzyme Q10 Softgels for Heart Health & Antioxidant Support, Naturally Fermented CoQ10 100mg for Women & Men, Non GMO - 120 Softgels",
+      "price": "$17.84",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:47.732Z"
+    },
+    "0525534393": {
+      "title": "The Daily Stoic Journal: 366 Days of Writing and Reflection on the Art of Living",
+      "price": "$16.27",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:51.968Z"
+    },
+    "0525533338": {
+      "title": "The Bullet Journal Method: Track the Past, Order the Present, Design the Future",
+      "price": "$13.55",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:51.968Z"
+    },
+    "0991846206": {
+      "title": "Intelligent Change The Five Minute Journal - Original Daily Gratitude Journal for Women & Men - Mindfulness, Happiness & Daily Reflection - Undated Planner - Affirmation Journal - Gifts for Women",
+      "price": "$29.99",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:51.968Z"
+    },
+    "0143129252": {
+      "title": "The Artist's Way: 30th Anniversary Edition",
+      "price": "$14.94",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:51.968Z"
+    },
+    "0399174826": {
+      "title": "Start Where You Are: A Journal for Self-Exploration",
+      "price": "$9.06",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:51.968Z"
+    },
+    "B000WJIC3G": {
+      "title": "Himalayan Chandra Porcelain Neti Pot",
+      "price": "$13.85",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:55.970Z"
+    },
+    "B07VKPJFG6": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:24:55.970Z"
+    },
+    "B07BFKP8PK": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:24:55.970Z"
+    },
+    "B01BPFCWIA": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:55.970Z"
+    },
+    "B00Y2CQRZY": {
+      "title": "URPOWER Essential Oil Diffuser with 7 LED Color Changing Lights, Timer & Auto-Off - Ultrasonic Aromatherapy Fragrant Oil Humidifier Vaporizer Scent Diffusers for Home, Bedroom, Office, Yoga",
+      "price": "$13.99",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:55.970Z"
+    },
+    "B000069EYA": {
+      "title": "First Aid Only 298 Piece All-Purpose Emergency First Aid Kit for Home, Office, Car, Apartment, Dorm, and Camping, Travel-Friendly Compact Pouch Fits in Backpacks, Suitcases, Cabinets, and Drawers",
+      "price": "$19.19",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:59.781Z"
+    },
+    "B003BS2PW4": {
+      "title": "Adventure Medical Kits Trauma Pak First Aid Kit with QuikClot Sponge, black, one size (2064-0292)",
+      "price": "$36.63",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:59.781Z"
+    },
+    "B000RJGJR8": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:24:59.781Z"
+    },
+    "B005GF2W6S": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:24:59.781Z"
+    },
+    "B003BIEQIA": {
+      "title": "N98247 Carbide End Mill, General Purpose, TiN Coated, 2 Flutes, Square End, 1&#34; Cutting Length, 3/4&#34; Cutting Diameter",
+      "price": null,
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:24:59.781Z"
+    },
+    "B07CTBHQZK": {
+      "title": "nutribullet Personal Blender, Shakes, Smoothies, Food Prep, and Frozen Blending, 24 Ounces, 600 Watt, Gray, NBR-0601WM",
+      "price": "$61.99",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:25:03.755Z"
+    },
+    "B01NAWZ4BF": {
+      "title": "My Dog Is My Valentine Chihuahua T-Shirt",
+      "price": "$19.99",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:25:03.755Z"
+    },
+    "B00FLYWNYQ": {
+      "title": "Instant Pot Duo 7-in-1 Electric Pressure Cooker, Slow Cooker, Rice, Steamer, Sauté, Yogurt Maker, Warmer & Sterilizer, Includes App With Over 800 Recipes, Stainless Steel, 6 Quart",
+      "price": "$109.99",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:25:03.755Z"
+    },
+    "B0758JHZM3": {
+      "title": "Vitamix E310 Explorian Blender, Professional-Grade, Self-Cleaning 48 oz. Container, Black",
+      "price": "$379.00",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:25:03.755Z"
+    },
+    "B0093162RM": {
+      "title": "Philips SmartSleep Wake-up Light, Colored Sunrise and Sunset Simulation, 5 Natural Sounds, FM Radio & Reading Lamp, Tap Snooze, HF3520/60",
+      "price": "$108.99",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:25:03.755Z"
+    },
+    "B09BVMFHZF": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:25:07.506Z"
+    },
+    "B01AVDVHTI": {
+      "title": "Fit Simplify Resistance Loop Exercise Bands with Instruction Guide and Carry Bag, Set of 5",
+      "price": "$9.98",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:25:07.506Z"
+    },
+    "B001ARYU58": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:25:07.506Z"
+    },
+    "B017HSNIEW": {
+      "title": "Sunny Health & Fitness Flip & Foldable Rowing Machine for Home w/Extended Slide Rail, Full-Body Workout, Low-Impact, Optional Extra Long Rail, Quiet Rail Cover, Water Motion and Free SunnyFit App",
+      "price": "$187.99",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:25:07.506Z"
+    },
+    "B0007VB4NE": {
+      "title": "Gaiam 610-6002RTL Balance Ball Chair - Classic Yoga Ball Chair with 52cm Stability Ball, Pump & Exercise Guide for Home or Office, Black",
+      "price": "$75.98",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:25:07.506Z"
+    },
+    "B001EJMS6K": {
+      "title": "Iron Gym Pull-Up Bar - Total Upper Body Workout Bar for Doorway, Adjustable Width Locking, No Screws Portable Door Frame Horizontal Chin-up Bar, Fitness Exercise",
+      "price": "$29.88",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:25:10.991Z"
+    },
+    "B0B4N3QLBP": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:25:10.991Z"
+    },
+    "B0027CCMNY": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:25:10.991Z"
+    },
+    "B07D8YWMZF": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:25:10.991Z"
+    },
+    "0062347748": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:25:10.991Z"
+    },
+    "0061735329": {
+      "title": "Clean: The Revolutionary Program to Restore the Body's Natural Ability to Heal Itself",
+      "price": "$24.07",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:25:15.070Z"
+    },
+    "0062427466": {
+      "title": "The Toxin Solution: How Hidden Poisons in the Air, Water, Food, and Products We Use Are Destroying Our Health--AND WHAT WE CAN DO TO FIX IT",
+      "price": "$8.97",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:25:15.070Z"
+    },
+    "0062882821": {
+      "title": "Super Human: The Bulletproof Plan to Age Backward and Maybe Even Live Forever",
+      "price": "$18.40",
+      "availability": "in-stock",
+      "lastChecked": "2026-04-16T15:25:19.458Z"
+    },
+    "163565243X": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:25:19.458Z"
+    },
+    "B07L1CDQF4": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:25:19.458Z"
+    },
+    "B09JYVQKZN": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:25:21.621Z"
+    },
+    "B00B8NKZ1E": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:25:21.621Z"
+    },
+    "B0797BHKR3": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:25:21.621Z"
+    },
+    "B010OSFLT0": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:25:21.621Z"
+    },
+    "B01DDJLKBO": {
+      "title": null,
+      "price": null,
+      "availability": "unavailable",
+      "lastChecked": "2026-04-16T15:25:21.621Z"
+    },
+    "B01G7SQBPQ": {
+      "title": null,
+      "price": null,
+      "availability": "unknown",
+      "lastChecked": "2026-04-16T15:25:23.646Z"
+    }
+  }
+}

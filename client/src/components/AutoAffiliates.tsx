@@ -1,4 +1,5 @@
 import { matchProducts, amazonUrl, type Product } from "@/data/product-catalog";
+import { getCachedPrice, getCachedAvailability } from "@/data/product-cache-types";
 
 interface AutoAffiliatesProps {
   articleTitle: string;
@@ -7,6 +8,9 @@ interface AutoAffiliatesProps {
 }
 
 function ProductCard({ product }: { product: Product }) {
+  const price = getCachedPrice(product.asin);
+  const avail = getCachedAvailability(product.asin);
+
   return (
     <a
       href={amazonUrl(product.asin)}
@@ -26,12 +30,24 @@ function ProductCard({ product }: { product: Product }) {
         <p className="text-xs text-stone-500 mt-1 leading-relaxed">
           {product.sentence}
         </p>
-        <span className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-amber-700 group-hover:text-amber-800">
-          View on Amazon
-          <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </span>
+        <div className="flex items-center gap-2 mt-2">
+          {price && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              ~{price}
+            </span>
+          )}
+          {avail === "unavailable" && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-50 text-red-600 border border-red-200">
+              Unavailable
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 group-hover:text-amber-800">
+            View on Amazon
+            <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </span>
+        </div>
       </div>
     </a>
   );
@@ -53,7 +69,7 @@ export default function AutoAffiliates({ articleTitle, articleCategory, articleT
         <h3 className="font-serif text-lg text-stone-800">Tools That Support This Work</h3>
       </div>
       <p className="text-sm text-stone-500 mb-4 leading-relaxed">
-        These are resources I genuinely recommend. As an Amazon Associate, I earn from qualifying purchases - at no extra cost to you.
+        These are resources I genuinely recommend. As an Amazon Associate, I earn from qualifying purchases - at no extra cost to you. Prices shown are approximate and may vary.
       </p>
       <div className="grid gap-3">
         {products.map((product) => (

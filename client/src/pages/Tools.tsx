@@ -1,5 +1,6 @@
 import Layout from "@/components/Layout";
 import SEOHead from "@/components/SEOHead";
+import { getCachedPrice, getCachedAvailability, getLastRefreshDate } from "@/data/product-cache-types";
 import { ExternalLink } from "lucide-react";
 
 const HERO_IMG = "https://system-free.b-cdn.net/images/hero-tools.webp";
@@ -106,7 +107,47 @@ const itemListSchema = {
   ),
 };
 
+/** Format the last refresh date for display */
+function formatRefreshDate(): string | null {
+  const d = getLastRefreshDate();
+  if (!d) return null;
+  try {
+    return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch {
+    return null;
+  }
+}
+
+function PriceBadge({ asin }: { asin: string }) {
+  const price = getCachedPrice(asin);
+  const avail = getCachedAvailability(asin);
+
+  if (!price && avail === "unknown") return null;
+
+  return (
+    <div className="flex items-center gap-2 mt-2">
+      {price && (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-health/10 text-health-dark border border-health/20">
+          ~{price}
+        </span>
+      )}
+      {avail === "in-stock" && (
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+          In Stock
+        </span>
+      )}
+      {avail === "unavailable" && (
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600 border border-red-200">
+          Currently Unavailable
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function Tools() {
+  const refreshDate = formatRefreshDate();
+
   return (
     <Layout>
       <SEOHead
@@ -137,6 +178,11 @@ export default function Tools() {
             {/* Affiliate Disclosure */}
             <div className="bg-amber/10 border border-amber/30 rounded-xl px-6 py-4 mb-12 text-sm text-foreground/70">
               <strong className="text-foreground">Disclosure:</strong> This page contains affiliate links. We may earn a small commission if you make a purchase — at no extra cost to you.
+              {refreshDate && (
+                <span className="block mt-1 text-xs text-muted-foreground">
+                  Prices and availability were last checked on {refreshDate}. Prices may vary.
+                </span>
+              )}
             </div>
 
             <div className="text-lg text-muted-foreground leading-relaxed mb-14 max-w-2xl">
@@ -171,6 +217,7 @@ export default function Tools() {
                                 <>{" "}See also: <a href={product.internalLink.href} className="text-health underline underline-offset-2 hover:text-health-dark">{product.internalLink.text}</a>.</>
                               )}
                             </p>
+                            {isAmazon && product.asin && <PriceBadge asin={product.asin} />}
                           </div>
                         </div>
                         <a href={href} target="_blank" rel={isAmazon ? "noopener" : "noopener nofollow"} className="inline-block mt-4 text-sm font-semibold text-health hover:underline no-underline">
@@ -182,6 +229,11 @@ export default function Tools() {
                 </div>
               </div>
             ))}
+
+            {/* FTC Price Disclaimer */}
+            <div className="mt-8 mb-4 p-4 rounded-lg bg-stone-50 border border-stone-200 text-xs text-stone-500 leading-relaxed">
+              <strong className="text-stone-600">Price & Availability Notice:</strong> Prices shown are approximate and were accurate as of the last automated check. Actual prices on Amazon may differ. Product availability is subject to change. As an Amazon Associate, we earn from qualifying purchases at no additional cost to you.
+            </div>
           </div>
         </div>
       </section>
