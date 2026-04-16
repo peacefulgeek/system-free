@@ -40,6 +40,25 @@ server.on("error", (err) => {
 });
 
 // ─── Banned AI words list ──────────────────────────────────────────────────
+const AMAZON_TAG = "spankyspinola-20";
+const MIN_AMAZON_LINKS = 3;
+
+// Product catalog for injecting Amazon links when articles have fewer than 3
+const PRODUCT_CATALOG = [
+  { asin: "1635574110", tags: ["medical billing", "hospital", "pricing", "healthcare cost", "insurance"], sentence: "One option that many people like is <a href=\"https://www.amazon.com/dp/1635574110?tag=spankyspinola-20\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">The Price We Pay</a>, which breaks down exactly how hospital pricing works" },
+  { asin: "0143110853", tags: ["healthcare system", "insurance", "medical industry", "profit"], sentence: "A tool that often helps with this is <a href=\"https://www.amazon.com/dp/0143110853?tag=spankyspinola-20\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">An American Sickness</a>, which traces how every branch of medicine became a profit center" },
+  { asin: "0593190009", tags: ["medical debt", "billing", "negotiate", "hospital bill", "financial"], sentence: "Something worth considering might be <a href=\"https://www.amazon.com/dp/0593190009?tag=spankyspinola-20\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">Never Pay the First Bill</a>, a step-by-step playbook for fighting medical charges" },
+  { asin: "0143115766", tags: ["financial freedom", "money", "budget", "independence"], sentence: "One option that many people like is <a href=\"https://www.amazon.com/dp/0143115766?tag=spankyspinola-20\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">Your Money or Your Life</a>, the classic guide to financial independence" },
+  { asin: "1595555277", tags: ["debt", "budget", "financial", "money", "savings"], sentence: "A tool that often helps with debt is <a href=\"https://www.amazon.com/dp/1595555277?tag=spankyspinola-20\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">The Total Money Makeover</a> by Dave Ramsey" },
+  { asin: "0735213615", tags: ["habits", "behavior", "change", "routine", "health"], sentence: "Something worth considering might be <a href=\"https://www.amazon.com/dp/0735213615?tag=spankyspinola-20\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">Atomic Habits</a> by James Clear, which shows how small changes compound" },
+  { asin: "1501144324", tags: ["mindfulness", "meditation", "stress", "anxiety", "calm"], sentence: "You could also try <a href=\"https://www.amazon.com/dp/1501144324?tag=spankyspinola-20\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">10% Happier</a> by Dan Harris, a practical guide to meditation for skeptics" },
+  { asin: "0062515675", tags: ["food", "nutrition", "diet", "eating", "health"], sentence: "For those looking at food differently, <a href=\"https://www.amazon.com/dp/0062515675?tag=spankyspinola-20\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">Food Fix</a> by Mark Hyman shows how what we eat connects to the larger system" },
+  { asin: "0062316117", tags: ["supplements", "natural", "alternative", "wellness", "body"], sentence: "A popular choice for understanding natural approaches is <a href=\"https://www.amazon.com/dp/0062316117?tag=spankyspinola-20\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">Sapiens</a> by Yuval Noah Harari, which puts our health choices in evolutionary context" },
+  { asin: "B08L5NMR53", tags: ["blood pressure", "monitor", "heart", "device", "health"], sentence: "One practical step is getting a <a href=\"https://www.amazon.com/dp/B08L5NMR53?tag=spankyspinola-20\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">home blood pressure monitor</a> so you can track your own numbers" },
+  { asin: "B0BQ3B3YBN", tags: ["berberine", "supplement", "blood sugar", "glucose", "metabolism"], sentence: "Something many readers have found helpful is <a href=\"https://www.amazon.com/dp/B0BQ3B3YBN?tag=spankyspinola-20\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">berberine supplements</a> for supporting healthy blood sugar levels" },
+  { asin: "B09GK8K2GF", tags: ["journal", "writing", "reflection", "mindfulness", "healing"], sentence: "A tool that often helps with the inner work is a <a href=\"https://www.amazon.com/dp/B09GK8K2GF?tag=spankyspinola-20\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">guided health journal</a> for tracking what actually works for your body" },
+];
+
 const BANNED_WORDS = [
   "profound", "profoundly", "transformative", "holistic", "nuanced",
   "multifaceted", "tapestry", "landscape", "paradigm", "synergy",
@@ -198,6 +217,7 @@ function runHumanizationCheck() {
 
   const data = JSON.parse(readFileSync(dataPath, "utf-8"));
   let fixes = 0;
+  let linkFixes = 0;
 
   for (const article of data.articles) {
     let body = article.body;
@@ -214,7 +234,6 @@ function runHumanizationCheck() {
       if (regex.test(body)) {
         const replacement = REPLACEMENTS[word] || word;
         body = body.replace(regex, (match) => {
-          // Preserve capitalization
           if (match[0] === match[0].toUpperCase()) {
             return replacement[0].toUpperCase() + replacement.slice(1);
           }
@@ -224,12 +243,56 @@ function runHumanizationCheck() {
       }
     }
 
+    // ─── Enforce 3+ Amazon affiliate links per article ──────────────
+    const amazonLinkCount = (body.match(/amazon\.com\/dp\//g) || []).length;
+    if (amazonLinkCount < MIN_AMAZON_LINKS) {
+      const needed = MIN_AMAZON_LINKS - amazonLinkCount;
+      // Find existing ASINs to avoid duplicates
+      const existingAsins = new Set((body.match(/amazon\.com\/dp\/([A-Z0-9]+)/g) || []).map(m => m.replace('amazon.com/dp/', '')));
+      
+      // Pick products not already in the article, matching article tags if possible
+      const articleText = (article.title + ' ' + article.description + ' ' + article.categorySlug).toLowerCase();
+      const candidates = PRODUCT_CATALOG
+        .filter(p => !existingAsins.has(p.asin))
+        .sort((a, b) => {
+          // Score by keyword match to article content
+          const scoreA = a.tags.filter(t => articleText.includes(t)).length;
+          const scoreB = b.tags.filter(t => articleText.includes(t)).length;
+          return scoreB - scoreA;
+        });
+
+      // Insert links into the body at paragraph boundaries
+      const paragraphs = body.split('</p>');
+      let inserted = 0;
+      if (paragraphs.length > 4 && candidates.length >= needed) {
+        // Spread links evenly through the article
+        const spacing = Math.floor((paragraphs.length - 2) / (needed + 1));
+        for (let i = 0; i < needed && i < candidates.length; i++) {
+          const insertIdx = Math.min(2 + spacing * (i + 1), paragraphs.length - 2);
+          paragraphs[insertIdx] = paragraphs[insertIdx] + '</p><p>' + candidates[i].sentence + '.</p';
+          inserted++;
+        }
+        body = paragraphs.join('</p>');
+        linkFixes += inserted;
+        console.log(`[cron] Added ${inserted} Amazon links to: ${article.slug}`);
+      }
+    }
+
+    // Verify all Amazon links have the correct tag
+    body = body.replace(/amazon\.com\/dp\/([A-Z0-9]+)(\?tag=[a-zA-Z0-9_-]+)?/g, (match, asin, existingTag) => {
+      if (existingTag !== `?tag=${AMAZON_TAG}`) {
+        fixes++;
+        return `amazon.com/dp/${asin}?tag=${AMAZON_TAG}`;
+      }
+      return match;
+    });
+
     article.body = body;
   }
 
-  if (fixes > 0) {
+  if (fixes > 0 || linkFixes > 0) {
     writeFileSync(dataPath, JSON.stringify(data));
-    console.log(`[cron] Humanization: ${fixes} fixes applied`);
+    console.log(`[cron] Humanization: ${fixes} word/emdash fixes, ${linkFixes} Amazon link injections`);
   } else {
     console.log(`[cron] Humanization: clean, no fixes needed`);
   }
