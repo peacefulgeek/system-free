@@ -54,7 +54,7 @@ function ProductCard({ product }: { product: Product }) {
 }
 
 export default function AutoAffiliates({ articleTitle, articleCategory, articleTags = [] }: AutoAffiliatesProps) {
-  const products = matchProducts(articleTitle, articleCategory, articleTags);
+  const products = matchProducts({ articleTitle, articleTags, articleCategory });
 
   if (products.length === 0) return null;
 

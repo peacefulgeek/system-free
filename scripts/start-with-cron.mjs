@@ -17,15 +17,15 @@ import { spawn } from "child_process";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import cron from "node-cron";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT = join(__dirname, "..");
 
 // ─── Auto-gen master switch ─────────────────────────────────────────────────
-// Set to true to enable all automated publishing, humanization, and spotlight crons.
-// Set to false to run the server only (no automated content changes).
-const AUTO_GEN_ENABLED = true;
+// Reads from env on Render; defaults to true for backward compat.
+const AUTO_GEN_ENABLED = (process.env.AUTO_GEN_ENABLED ?? "true") === "true";
 
 // ─── Start the Express server ───────────────────────────────────────────────
 console.log("[cron] Starting Express server...");
@@ -60,57 +60,69 @@ const PRODUCT_CATALOG = [
 ];
 
 const BANNED_WORDS = [
-  "profound", "profoundly", "transformative", "holistic", "nuanced",
-  "multifaceted", "tapestry", "landscape", "paradigm", "synergy",
-  "leverage", "delve", "embark", "foster", "moreover", "furthermore",
-  "comprehensive", "intricate", "pivotal", "beacon", "cornerstone",
-  "underscores", "navigating", "realm", "unveil", "harness",
-  "groundbreaking", "cutting-edge", "game-changer", "robust",
-  "seamless", "streamline", "spearhead", "catalyst", "empower",
-  "revolutionize", "elevate", "optimize", "innovative", "dynamic",
+  // Classic AI tells
+  "delve", "tapestry", "paradigm", "synergy", "leverage", "unlock", "empower",
+  "utilize", "pivotal", "embark", "underscore", "paramount", "seamlessly",
+  "robust", "beacon", "foster", "elevate", "curate", "curated", "bespoke",
+  "resonate", "harness", "intricate", "plethora", "myriad", "comprehensive",
+  // Marketing fluff
+  "transformative", "groundbreaking", "innovative", "cutting-edge", "revolutionary",
+  "state-of-the-art", "ever-evolving", "game-changing", "next-level", "world-class",
+  "unparalleled", "unprecedented", "remarkable", "extraordinary", "exceptional",
+  // Abstract filler
+  "profound", "profoundly", "holistic", "nuanced", "multifaceted", "stakeholders",
+  "ecosystem", "landscape", "realm", "sphere", "domain",
+  // AI hedging
+  "arguably", "notably", "crucially", "importantly", "essentially",
+  "fundamentally", "inherently", "intrinsically", "substantively",
+  // Bullshit verbs
+  "streamline", "optimize", "facilitate", "amplify", "catalyze",
+  "propel", "spearhead", "orchestrate", "navigate", "traverse",
+  // AI-favorite connectors
+  "furthermore", "moreover", "additionally", "consequently", "subsequently",
+  "thereby", "thusly", "wherein", "whereby",
+  // Original extras
+  "cornerstone", "underscores", "navigating", "unveil",
+  "game-changer", "seamless", "catalyst", "revolutionize", "dynamic",
 ];
 
 const REPLACEMENTS = {
-  "profound": "real",
-  "profoundly": "deeply",
-  "transformative": "life-changing",
-  "holistic": "whole-person",
-  "nuanced": "layered",
-  "multifaceted": "complex",
-  "tapestry": "web",
-  "landscape": "terrain",
-  "paradigm": "framework",
-  "synergy": "connection",
-  "leverage": "use",
-  "delve": "dig",
-  "embark": "start",
-  "foster": "build",
-  "moreover": "And",
-  "furthermore": "Also",
-  "comprehensive": "thorough",
-  "intricate": "detailed",
-  "pivotal": "key",
-  "beacon": "signal",
-  "cornerstone": "foundation",
-  "underscores": "highlights",
-  "navigating": "working through",
-  "realm": "space",
-  "unveil": "reveal",
-  "harness": "use",
-  "groundbreaking": "new",
-  "cutting-edge": "modern",
-  "game-changer": "shift",
-  "robust": "strong",
-  "seamless": "smooth",
-  "streamline": "simplify",
-  "spearhead": "lead",
-  "catalyst": "spark",
-  "empower": "support",
-  "revolutionize": "reshape",
-  "elevate": "raise",
-  "optimize": "improve",
-  "innovative": "creative",
-  "dynamic": "active",
+  // Classic AI tells
+  "delve": "dig", "tapestry": "web", "paradigm": "framework", "synergy": "connection",
+  "leverage": "use", "unlock": "open", "empower": "support", "utilize": "use",
+  "pivotal": "key", "embark": "start", "underscore": "highlight", "paramount": "critical",
+  "seamlessly": "smoothly", "robust": "strong", "beacon": "signal", "foster": "build",
+  "elevate": "raise", "curate": "pick", "curated": "picked", "bespoke": "custom",
+  "resonate": "connect", "harness": "use", "intricate": "detailed", "plethora": "many",
+  "myriad": "many", "comprehensive": "thorough",
+  // Marketing fluff
+  "transformative": "life-changing", "groundbreaking": "new", "innovative": "creative",
+  "cutting-edge": "modern", "revolutionary": "new", "state-of-the-art": "modern",
+  "ever-evolving": "changing", "game-changing": "big", "next-level": "better",
+  "world-class": "top", "unparalleled": "rare", "unprecedented": "unusual",
+  "remarkable": "notable", "extraordinary": "unusual", "exceptional": "strong",
+  // Abstract filler
+  "profound": "real", "profoundly": "deeply", "holistic": "whole-person",
+  "nuanced": "layered", "multifaceted": "complex", "stakeholders": "people involved",
+  "ecosystem": "system", "landscape": "terrain", "realm": "space",
+  "sphere": "area", "domain": "field",
+  // AI hedging
+  "arguably": "possibly", "notably": "especially", "crucially": "critically",
+  "importantly": "critically", "essentially": "basically", "fundamentally": "at its core",
+  "inherently": "naturally", "intrinsically": "naturally", "substantively": "meaningfully",
+  // Bullshit verbs
+  "streamline": "simplify", "optimize": "improve", "facilitate": "help",
+  "amplify": "increase", "catalyze": "trigger", "propel": "push",
+  "spearhead": "lead", "orchestrate": "organize", "navigate": "work through",
+  "traverse": "cross",
+  // AI-favorite connectors
+  "furthermore": "Also", "moreover": "And", "additionally": "Also",
+  "consequently": "So", "subsequently": "Then", "thereby": "so",
+  "thusly": "so", "wherein": "where", "whereby": "where",
+  // Original extras
+  "cornerstone": "foundation", "underscores": "highlights", "navigating": "working through",
+  "unveil": "reveal", "game-changer": "shift", "seamless": "smooth",
+  "catalyst": "spark", "revolutionize": "reshape", "dynamic": "active",
 };
 
 // ─── Auto-publish function ──────────────────────────────────────────────────
@@ -684,51 +696,55 @@ async function runProductMetaRefresh() {
   console.log(`  - Cache size: ${Object.keys(cache.products).length} products`);
 }
 
-// ─── Schedule ───────────────────────────────────────────────────────────────
+// ─── Schedule (node-cron) ──────────────────────────────────────────────────
+// All crons use node-cron expressions instead of setTimeout/setInterval.
+// This avoids the ~24.8-day overflow bug and survives Render restarts.
 if (AUTO_GEN_ENABLED) {
-  // Run immediately on startup (with delay for server to start)
+  // Run once on startup (after server has time to bind)
   setTimeout(() => {
     runAutoPublish();
     runHumanizationCheck();
-    productSpotlight();
   }, 5000);
 
-  // Auto-publish: every 6 hours
-  const SIX_HOURS = 6 * 60 * 60 * 1000;
-  setInterval(runAutoPublish, SIX_HOURS);
+  // 1. Article auto-publish — Mon-Fri 06:00 UTC (5/week)
+  cron.schedule('0 6 * * 1-5', async () => {
+    console.log(`[cron] auto-publish ${new Date().toISOString()}`);
+    try { runAutoPublish(); } catch (e) { console.error('[cron] auto-publish failed:', e); }
+  }, { timezone: 'UTC' });
 
-  // Humanization check: every 12 hours
-  const TWELVE_HOURS = 12 * 60 * 60 * 1000;
-  setInterval(runHumanizationCheck, TWELVE_HOURS);
+  // 2. Humanization check — every 12 hours (00:00 and 12:00 UTC)
+  cron.schedule('0 0,12 * * *', async () => {
+    console.log(`[cron] humanization-check ${new Date().toISOString()}`);
+    try { runHumanizationCheck(); } catch (e) { console.error('[cron] humanization-check failed:', e); }
+  }, { timezone: 'UTC' });
 
-  // Product spotlight: weekly
-  const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
-  setInterval(productSpotlight, ONE_WEEK);
+  // 3. Product spotlight — Saturday 08:00 UTC (1/week)
+  cron.schedule('0 8 * * 6', async () => {
+    console.log(`[cron] product-spotlight ${new Date().toISOString()}`);
+    try { productSpotlight(); } catch (e) { console.error('[cron] product-spotlight failed:', e); }
+  }, { timezone: 'UTC' });
 
-  // Product freshness check: weekly (offset by 3 days from spotlight)
-  setTimeout(() => {
-    runProductFreshnessCheck();
-    setInterval(runProductFreshnessCheck, ONE_WEEK);
-  }, 3 * 24 * 60 * 60 * 1000); // First run after 3 days, then weekly
+  // 4. Product freshness check (ASIN health) — Sunday 05:00 UTC
+  cron.schedule('0 5 * * 0', async () => {
+    console.log(`[cron] product-freshness ${new Date().toISOString()}`);
+    try { await runProductFreshnessCheck(); } catch (e) { console.error('[cron] product-freshness failed:', e); }
+  }, { timezone: 'UTC' });
 
-  // Product metadata refresh: weekly (offset by 5 days from spotlight)
-  // Fetches titles, prices, availability from Amazon and updates product-cache.json
-  setTimeout(() => {
-    runProductMetaRefresh();
-    setInterval(runProductMetaRefresh, ONE_WEEK);
-  }, 5 * 24 * 60 * 60 * 1000); // First run after 5 days, then weekly
+  // 5. Product metadata refresh (titles, prices, availability) — Wednesday 04:00 UTC
+  cron.schedule('0 4 * * 3', async () => {
+    console.log(`[cron] product-meta-refresh ${new Date().toISOString()}`);
+    try { await runProductMetaRefresh(); } catch (e) { console.error('[cron] product-meta-refresh failed:', e); }
+  }, { timezone: 'UTC' });
 
-  console.log("[cron] AUTO_GEN_ENABLED = true");
-  console.log("[cron] Schedules active:");
-  console.log("  - Auto-publish: every 6 hours");
-  console.log("  - Humanization check: every 12 hours");
-  console.log("  - Product spotlight: weekly");
-  console.log("  - Product freshness check: weekly (offset 3 days)");
-  console.log("  - Product metadata refresh: weekly (offset 5 days)");
-  console.log("  - Phase 1: 5 articles/day (staggered dateISO)");
-  console.log("  - Phase 2: After all 300 live, weekly refresh");
+  console.log('[cron] AUTO_GEN_ENABLED = true');
+  console.log('[cron] All 5 node-cron schedules registered:');
+  console.log('  1. Auto-publish:          Mon-Fri 06:00 UTC');
+  console.log('  2. Humanization check:    00:00 & 12:00 UTC daily');
+  console.log('  3. Product spotlight:     Saturday 08:00 UTC');
+  console.log('  4. Product freshness:     Sunday 05:00 UTC');
+  console.log('  5. Product meta refresh:  Wednesday 04:00 UTC');
 } else {
-  console.log("[cron] AUTO_GEN_ENABLED = false — server only, no automated crons");
+  console.log('[cron] AUTO_GEN_ENABLED != "true" — cron disabled');
 }
 
 // ─── Graceful shutdown ──────────────────────────────────────────────────────

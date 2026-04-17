@@ -178,10 +178,20 @@ export const products: Product[] = [
 ];
 
 /**
- * Match products to an article based on title, category, and tags
- * Returns up to 4 matching products, prioritized by relevance
+ * Match products to an article based on title, category, and tags.
+ * Uses named parameters to prevent argument-flip crashes.
+ * Returns up to 4 matching products, prioritized by relevance.
  */
-export function matchProducts(articleTitle: string, articleCategory: string, articleTags: string[] = []): Product[] {
+export function matchProducts({ articleTitle, articleCategory, articleTags = [], minLinks = 3, maxLinks = 4 }: {
+  articleTitle: string;
+  articleCategory: string;
+  articleTags?: string[];
+  minLinks?: number;
+  maxLinks?: number;
+}): Product[] {
+  if (typeof articleTitle !== 'string') throw new TypeError('articleTitle must be string');
+  if (!Array.isArray(articleTags)) throw new TypeError('articleTags must be array');
+  if (typeof articleCategory !== 'string') throw new TypeError('articleCategory must be string');
   const titleLower = articleTitle.toLowerCase();
   const catLower = articleCategory.toLowerCase();
   const tagSet = new Set(articleTags.map(t => t.toLowerCase()));

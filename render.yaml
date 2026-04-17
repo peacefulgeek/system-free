@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: system-free
+    runtime: node
+    plan: starter
+    region: oregon
+    branch: main
+    autoDeploy: true
+    buildCommand: pnpm install --frozen-lockfile && pnpm build
+    startCommand: node scripts/start-with-cron.mjs
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: AMAZON_TAG
+        value: spankyspinola-20
+      - key: AUTO_GEN_ENABLED
+        value: "true"
+      - key: DATABASE_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: FAL_KEY
+        sync: false
+      - key: BUNNY_STORAGE_ZONE
+        sync: false
+      - key: BUNNY_API_KEY
+        sync: false
+      - key: BUNNY_PULL_ZONE_URL
+        sync: false
