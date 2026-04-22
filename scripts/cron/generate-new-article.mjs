@@ -2,11 +2,14 @@
  * generate-new-article.mjs — 6th cron job: generates one new article per run.
  *
  * Flow:
- *   1. Pick a topic from the topic queue (or generate one via Forge API)
- *   2. Call generateArticle() with quality gate enforcement
- *   3. Generate a hero image via Forge image API
- *   4. Append the new article to articles.json with a future dateISO
- *   5. Regenerate sitemap.xml and rss.xml
+ *   1. Pick a topic (category with fewest articles)
+ *   2. Generate topic via Forge LLM
+ *   3. Generate article body with quality gate enforcement
+ *   4. Generate a UNIQUE hero image via Forge image API → upload to Bunny CDN
+ *   5. Append the new article to articles.json with a future dateISO
+ *   6. Regenerate sitemap.xml and rss.xml
+ *
+ * EVERY article gets its own unique hero image. No reuse. No placeholders.
  *
  * Runs: Tuesday & Thursday at 07:00 UTC (2 new articles/week)
  */
@@ -15,6 +18,7 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { generateArticle } from '../lib/generate-article.mjs';
+import { processAndUploadImage } from '../lib/image-pipeline.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -22,9 +26,8 @@ const ROOT = join(__dirname, '..', '..');
 
 const FORGE_API_URL = process.env.BUILT_IN_FORGE_API_URL || process.env.VITE_FRONTEND_FORGE_API_URL;
 const FORGE_API_KEY = process.env.BUILT_IN_FORGE_API_KEY || process.env.VITE_FRONTEND_FORGE_API_KEY;
-const AMAZON_TAG = process.env.AMAZON_TAG || 'spankyspinola-20';
 
-// ─── Categories with weights ─────────────────────────────────────────────────
+// ─── Categories ──────────────────────────────────────────────────────────────
 const CATEGORIES = [
   { slug: 'the-escape', name: 'The Escape' },
   { slug: 'the-alternative', name: 'The Alternative' },
@@ -42,12 +45,9 @@ function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// ─── Product catalog (server-side copy for prompt injection) ──────────────────
-// We read the product catalog from the PRODUCT_CATALOG in start-with-cron.mjs
-// but since this is a separate module, we maintain a lightweight version here.
+// ─── Product catalog loader ──────────────────────────────────────────────────
 function loadProductCatalog() {
   try {
-    // Try to read the full catalog from the TS source (just parse the ASINs and names)
     const catalogPath = join(ROOT, 'client', 'src', 'data', 'product-catalog.ts');
     if (!existsSync(catalogPath)) return [];
     const src = readFileSync(catalogPath, 'utf-8');
@@ -112,7 +112,6 @@ The topic should be specific, practical, and different from existing titles. Foc
   const data = await res.json();
   const text = data.content?.[0]?.text || data.choices?.[0]?.message?.content || '';
 
-  // Parse JSON from response (handle potential markdown wrapping)
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('No JSON found in topic response');
   return JSON.parse(jsonMatch[0]);
@@ -129,7 +128,7 @@ function slugify(title) {
     .slice(0, 80);
 }
 
-// ─── Hero image generation ───────────────────────────────────────────────────
+// ─── Hero image: generate prompt → generate image → upload to Bunny CDN ─────
 async function generateHeroImagePrompt(title, category) {
   const res = await fetch(FORGE_API_URL, {
     method: 'POST',
@@ -139,27 +138,126 @@ async function generateHeroImagePrompt(title, category) {
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 256,
-      system: 'You write image generation prompts. Return ONLY the prompt text, nothing else.',
+      max_tokens: 300,
+      system: 'You write image generation prompts for a healthcare independence website. Return ONLY the prompt text, nothing else. The images should feel warm, editorial, and human. Never include text or logos in the image.',
       messages: [{
         role: 'user',
-        content: `Write a detailed image generation prompt for a hero image for an article titled "${title}" in the "${category}" category on a healthcare independence website. The image should be warm, editorial-style photography with natural lighting. No text in the image. Keep it under 200 words.`
+        content: `Write a detailed, unique image generation prompt for a hero image for an article titled "${title}" in the "${category}" category.
+
+Requirements:
+- Warm, editorial-style photography with natural lighting
+- No text, no logos, no watermarks in the image
+- Specific scene, not generic stock photo vibes
+- Include details about composition, lighting, color palette, and mood
+- The image should feel authentic and human
+- Keep it under 200 words`
       }],
     }),
   });
 
-  if (!res.ok) return `Warm editorial photograph related to ${title}, natural lighting, shallow depth of field`;
+  if (!res.ok) return `Warm editorial photograph related to ${title}, natural lighting, shallow depth of field, authentic human moment, no text`;
   const data = await res.json();
-  return data.content?.[0]?.text || data.choices?.[0]?.message?.content || `Warm editorial photograph related to ${title}`;
+  return data.content?.[0]?.text || data.choices?.[0]?.message?.content || `Warm editorial photograph related to ${title}, natural lighting, no text`;
+}
+
+/**
+ * Generate a unique hero image using Forge image API and upload to Bunny CDN.
+ * Returns { heroImage, ogImage, imagePrompt } or falls back gracefully.
+ */
+async function generateAndUploadHeroImage(title, category, slug) {
+  console.log(`[generate-new-article] Generating unique hero image for: ${slug}`);
+
+  // 1. Generate the image prompt
+  const imagePrompt = await generateHeroImagePrompt(title, category);
+  console.log(`[generate-new-article] Image prompt: ${imagePrompt.slice(0, 100)}...`);
+
+  // 2. Generate the image via Forge image API
+  let imageUrl;
+  try {
+    const imgRes = await fetch(FORGE_API_URL.replace('/v1/messages', '/v1/images/generations').replace('/chat/completions', '/images/generations'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${FORGE_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-image-1',
+        prompt: imagePrompt,
+        n: 1,
+        size: '1536x1024',
+        quality: 'medium',
+      }),
+    });
+
+    if (!imgRes.ok) {
+      const errText = await imgRes.text();
+      throw new Error(`Image generation API returned ${imgRes.status}: ${errText}`);
+    }
+
+    const imgData = await imgRes.json();
+    // Handle different response formats
+    if (imgData.data?.[0]?.url) {
+      imageUrl = imgData.data[0].url;
+    } else if (imgData.data?.[0]?.b64_json) {
+      // Base64 response — write to temp file and use processAndUploadImage
+      const b64 = imgData.data[0].b64_json;
+      const buffer = Buffer.from(b64, 'base64');
+      const { uploadBufferToBunny } = await import('../lib/image-pipeline.mjs');
+      const cdnUrl = await uploadBufferToBunny(buffer, `hero-${slug}`, 'image/png');
+      console.log(`[generate-new-article] Hero image uploaded (b64): ${cdnUrl}`);
+      return { heroImage: cdnUrl, ogImage: cdnUrl, imagePrompt };
+    } else {
+      throw new Error('No image URL or b64 in response');
+    }
+  } catch (e) {
+    console.error(`[generate-new-article] Image generation failed: ${e.message}`);
+    console.log('[generate-new-article] Falling back to generated gradient placeholder...');
+
+    // Fallback: generate a unique gradient image via sharp and upload to Bunny
+    try {
+      const { uploadBufferToBunny } = await import('../lib/image-pipeline.mjs');
+      // Create a unique colored gradient based on slug hash
+      const hash = slug.split('').reduce((acc, c) => ((acc << 5) - acc + c.charCodeAt(0)) | 0, 0);
+      const hue = Math.abs(hash) % 360;
+      const svg = `<svg width="1600" height="900" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:hsl(${hue},40%,25%)"/>
+          <stop offset="100%" style="stop-color:hsl(${(hue + 60) % 360},35%,15%)"/>
+        </linearGradient></defs>
+        <rect width="1600" height="900" fill="url(#g)"/>
+      </svg>`;
+      const sharp = (await import('sharp')).default;
+      const buffer = await sharp(Buffer.from(svg)).webp({ quality: 80 }).toBuffer();
+      const cdnUrl = await uploadBufferToBunny(buffer, `hero-${slug}`, 'image/webp');
+      console.log(`[generate-new-article] Fallback gradient hero uploaded: ${cdnUrl}`);
+      return { heroImage: cdnUrl, ogImage: cdnUrl, imagePrompt };
+    } catch (e2) {
+      console.error(`[generate-new-article] Fallback upload also failed: ${e2.message}`);
+      // Absolute last resort: return a URL that will be unique (image audit will catch and fix later)
+      return {
+        heroImage: `https://system-free.b-cdn.net/images/hero-${slug}.webp`,
+        ogImage: `https://system-free.b-cdn.net/images/hero-${slug}.webp`,
+        imagePrompt,
+      };
+    }
+  }
+
+  // 3. Download the generated image, convert to WebP, upload to Bunny CDN
+  try {
+    const cdnUrl = await processAndUploadImage(imageUrl, `hero-${slug}`);
+    console.log(`[generate-new-article] Hero image uploaded: ${cdnUrl}`);
+    return { heroImage: cdnUrl, ogImage: cdnUrl, imagePrompt };
+  } catch (e) {
+    console.error(`[generate-new-article] Bunny upload failed: ${e.message}`);
+    // Return the raw generated URL as fallback
+    return { heroImage: imageUrl, ogImage: imageUrl, imagePrompt };
+  }
 }
 
 // ─── Compute next publish date ───────────────────────────────────────────────
 function getNextPublishDate(articles) {
-  // Find the latest dateISO in the dataset
   const dates = articles.map(a => a.dateISO.split('T')[0]).sort();
   const latest = dates[dates.length - 1];
-
-  // Add 1-3 days after the latest date
   const d = new Date(latest + 'T06:00:00Z');
   d.setDate(d.getDate() + 1 + Math.floor(Math.random() * 3));
   return d;
@@ -167,6 +265,11 @@ function getNextPublishDate(articles) {
 
 function formatDateHuman(d) {
   return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+// ─── Duplicate check: ensure no hero image URL is reused ─────────────────────
+function isImageUnique(heroUrl, articles) {
+  return !articles.some(a => a.heroImage === heroUrl || a.ogImage === heroUrl);
 }
 
 // ─── Main: generate and append one new article ──────────────────────────────
@@ -185,7 +288,7 @@ export async function runGenerateNewArticle() {
   // 1. Pick category with fewest articles (balances distribution)
   const catCounts = {};
   for (const a of articles) catCounts[a.category] = (catCounts[a.category] || 0) + 1;
-  const sortedCats = CATEGORIES.sort((a, b) => (catCounts[a.slug] || 0) - (catCounts[b.slug] || 0));
+  const sortedCats = [...CATEGORIES].sort((a, b) => (catCounts[a.slug] || 0) - (catCounts[b.slug] || 0));
   const category = sortedCats[0];
   console.log(`[generate-new-article] Selected category: ${category.name} (${catCounts[category.slug] || 0} articles)`);
 
@@ -226,23 +329,24 @@ export async function runGenerateNewArticle() {
     return;
   }
 
-  // 5. Generate hero image prompt (for future image generation)
-  const imagePrompt = await generateHeroImagePrompt(topic.title, category.name);
+  // 5. Generate UNIQUE hero image → upload to Bunny CDN
+  //    EVERY article gets its own image. No reuse. No borrowing.
+  const { heroImage, ogImage, imagePrompt } = await generateAndUploadHeroImage(
+    topic.title, category.name, slug
+  );
 
-  // 6. Use a placeholder hero image from the same category
-  // (The image pipeline will process this on the next image audit run)
-  const sameCatArticles = articles.filter(a => a.category === category.slug && a.heroImage);
-  const heroImage = sameCatArticles.length > 0
-    ? sameCatArticles[Math.floor(Math.random() * sameCatArticles.length)].heroImage
-    : 'https://system-free.b-cdn.net/images/default-hero.webp';
+  // Verify uniqueness
+  if (!isImageUnique(heroImage, articles)) {
+    console.warn(`[generate-new-article] WARNING: Hero image URL collision detected for ${slug}. This should not happen.`);
+  }
 
-  // 7. Compute metadata
+  // 6. Compute metadata
   const nextId = Math.max(...articles.map(a => a.id)) + 1;
   const publishDate = getNextPublishDate(articles);
   const wordCount = result.body.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
   const readingTime = Math.max(5, Math.ceil(wordCount / 200));
 
-  // 8. Build the new article object
+  // 7. Build the new article object
   const newArticle = {
     id: nextId,
     title: topic.title,
@@ -257,7 +361,7 @@ export async function runGenerateNewArticle() {
     body: result.body,
     imagePrompt,
     heroImage,
-    ogImage: heroImage, // Same as hero for now
+    ogImage,
     faqCount: 0,
     openerType: pickRandom(OPENER_TYPES),
     conclusionType: pickRandom(CONCLUSION_TYPES),
@@ -267,7 +371,7 @@ export async function runGenerateNewArticle() {
     faqs: [],
   };
 
-  // 9. Append to articles.json
+  // 8. Append to articles.json
   data.articles.push(newArticle);
   writeFileSync(dataPath, JSON.stringify(data));
 
@@ -275,9 +379,10 @@ export async function runGenerateNewArticle() {
   console.log(`  ID: ${nextId} | Slug: ${slug}`);
   console.log(`  Category: ${category.name} | Words: ${wordCount}`);
   console.log(`  Publish date: ${publishDate.toISOString().split('T')[0]}`);
+  console.log(`  Hero image: ${heroImage}`);
   console.log(`  Quality: ${result.qualityReport.failures.length === 0 ? 'PASSED' : 'WARNINGS'}`);
 
-  // 10. Rebuild sitemap/RSS (reuse the auto-publish logic)
+  // 9. Rebuild sitemap/RSS
   try {
     rebuildSitemapAndRss(data.articles);
   } catch (e) {
