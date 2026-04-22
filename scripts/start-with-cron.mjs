@@ -18,6 +18,7 @@ import { readFileSync, writeFileSync, existsSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import cron from "node-cron";
+import { verifyAffiliateLinks } from "./cron/verify-affiliates.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -724,10 +725,10 @@ if (AUTO_GEN_ENABLED) {
     try { productSpotlight(); } catch (e) { console.error('[cron] product-spotlight failed:', e); }
   }, { timezone: 'UTC' });
 
-  // 4. Product freshness check (ASIN health) — Sunday 05:00 UTC
+  // 4. ASIN verification (enhanced soft-404 detection) — Sunday 05:00 UTC
   cron.schedule('0 5 * * 0', async () => {
-    console.log(`[cron] product-freshness ${new Date().toISOString()}`);
-    try { await runProductFreshnessCheck(); } catch (e) { console.error('[cron] product-freshness failed:', e); }
+    console.log(`[cron] verify-affiliates ${new Date().toISOString()}`);
+    try { await verifyAffiliateLinks(); } catch (e) { console.error('[cron] verify-affiliates failed:', e); }
   }, { timezone: 'UTC' });
 
   // 5. Product metadata refresh (titles, prices, availability) — Wednesday 04:00 UTC
@@ -741,7 +742,7 @@ if (AUTO_GEN_ENABLED) {
   console.log('  1. Auto-publish:          Mon-Fri 06:00 UTC');
   console.log('  2. Humanization check:    00:00 & 12:00 UTC daily');
   console.log('  3. Product spotlight:     Saturday 08:00 UTC');
-  console.log('  4. Product freshness:     Sunday 05:00 UTC');
+  console.log('  4. ASIN verification:     Sunday 05:00 UTC (enhanced soft-404)');
   console.log('  5. Product meta refresh:  Wednesday 04:00 UTC');
 } else {
   console.log('[cron] AUTO_GEN_ENABLED != "true" — cron disabled');
