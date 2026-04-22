@@ -19,6 +19,7 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import cron from "node-cron";
 import { verifyAffiliateLinks } from "./cron/verify-affiliates.mjs";
+import { runGenerateNewArticle } from "./cron/generate-new-article.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -737,13 +738,20 @@ if (AUTO_GEN_ENABLED) {
     try { await runProductMetaRefresh(); } catch (e) { console.error('[cron] product-meta-refresh failed:', e); }
   }, { timezone: 'UTC' });
 
+  // 6. New article generation — Tuesday & Thursday 07:00 UTC (2/week)
+  cron.schedule('0 7 * * 2,4', async () => {
+    console.log(`[cron] generate-new-article ${new Date().toISOString()}`);
+    try { await runGenerateNewArticle(); } catch (e) { console.error('[cron] generate-new-article failed:', e); }
+  }, { timezone: 'UTC' });
+
   console.log('[cron] AUTO_GEN_ENABLED = true');
-  console.log('[cron] All 5 node-cron schedules registered:');
+  console.log('[cron] All 6 node-cron schedules registered:');
   console.log('  1. Auto-publish:          Mon-Fri 06:00 UTC');
   console.log('  2. Humanization check:    00:00 & 12:00 UTC daily');
   console.log('  3. Product spotlight:     Saturday 08:00 UTC');
   console.log('  4. ASIN verification:     Sunday 05:00 UTC (enhanced soft-404)');
   console.log('  5. Product meta refresh:  Wednesday 04:00 UTC');
+  console.log('  6. New article gen:       Tue & Thu 07:00 UTC (2/week)');
 } else {
   console.log('[cron] AUTO_GEN_ENABLED != "true" — cron disabled');
 }
