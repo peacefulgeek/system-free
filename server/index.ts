@@ -15,6 +15,16 @@ async function startServer() {
     res.json({ status: "ok", uptime: process.uptime() });
   });
 
+  // 301 redirect www → non-www (canonical domain)
+  app.use((req, res, next) => {
+    const host = req.hostname || req.headers.host || "";
+    if (host.startsWith("www.")) {
+      const canonical = host.replace(/^www\./, "");
+      return res.redirect(301, `${req.protocol}://${canonical}${req.originalUrl}`);
+    }
+    next();
+  });
+
   // Serve static files from dist/public in production
   const staticPath =
     process.env.NODE_ENV === "production"
