@@ -21,6 +21,9 @@ export interface Article {
   linkType?: string;
   hasAffiliateLink?: boolean;
   faqs?: { q: string; a: string }[];
+  status?: 'published' | 'queued' | 'draft';
+  queued_at?: string;
+  published_at?: string;
 }
 
 export interface Category {
@@ -32,9 +35,14 @@ export interface Category {
 
 const allArticles: Article[] = (articlesJson as { articles: Article[] }).articles;
 
-// Only show articles with publish date <= today
+// Only show published articles (status='published' or legacy articles with dateISO <= today)
 const today = new Date().toISOString().split("T")[0];
-export const liveArticles = allArticles.filter((a) => a.dateISO <= today);
+export const liveArticles = allArticles.filter((a) => {
+  // New queue system: only show published
+  if (a.status) return a.status === 'published';
+  // Legacy articles (no status field): use date-based filter
+  return a.dateISO <= today;
+});
 export const allArticlesData = allArticles;
 
 export const categories: Category[] = [

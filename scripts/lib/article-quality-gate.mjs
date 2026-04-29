@@ -1,218 +1,198 @@
 /**
- * article-quality-gate.mjs — Every article must pass ALL checks before storage.
- * Enforces: word count, Amazon links, zero em-dashes, zero AI-flagged words/phrases,
- * voice signals (contractions, sentence variance, conversational markers).
+ * article-quality-gate.mjs — THE PAUL VOICE GATE (NON-NEGOTIABLE)
+ *
+ * Every article generated (whether by bulk-seed or cron) must pass this gate.
+ * If it fails, the caller must regenerate (up to 4 attempts).
+ * Do not store failed articles.
+ *
+ * Checks:
+ *   1. Banned Words (regex match, case-insensitive) → FAIL AND REGENERATE
+ *   2. Banned Phrases (string match, case-insensitive) → FAIL AND REGENERATE
+ *   3. Em-dashes (— or –) → auto-replace, then FAIL if any survive
+ *   4. Word Count: 1,200–2,500 → FAIL AND REGENERATE if outside
+ *   5. Amazon Affiliate Links: exactly 3 or 4 → FAIL AND REGENERATE
+ *   6. Voice & Tone: direct address, contractions, dialogue markers
  */
 
-import { countAmazonLinks, extractAsinsFromText } from './amazon-verify.mjs';
-
-// Words that flag content as AI-generated. Pulled from public AI-detection research
-// (Originality.ai, GPTZero, Copyleaks) and Google's Helpful Content Update patterns.
-const AI_FLAGGED_WORDS = [
-  // The classic AI tells
-  'delve', 'tapestry', 'paradigm', 'synergy', 'leverage', 'unlock', 'empower',
-  'utilize', 'pivotal', 'embark', 'underscore', 'paramount', 'seamlessly',
-  'robust', 'beacon', 'foster', 'elevate', 'curate', 'curated', 'bespoke',
-  'resonate', 'harness', 'intricate', 'plethora', 'myriad', 'comprehensive',
-  // Marketing fluff that AI loves
-  'transformative', 'groundbreaking', 'innovative', 'cutting-edge', 'revolutionary',
-  'state-of-the-art', 'ever-evolving', 'game-changing', 'next-level', 'world-class',
-  'unparalleled', 'unprecedented', 'remarkable', 'extraordinary', 'exceptional',
-  // Abstract filler
-  'profound', 'holistic', 'nuanced', 'multifaceted', 'stakeholders',
-  'ecosystem', 'landscape', 'realm', 'sphere', 'domain',
-  // AI hedging
-  'arguably', 'notably', 'crucially', 'importantly', 'essentially',
-  'fundamentally', 'inherently', 'intrinsically', 'substantively',
-  // Bullshit verbs
-  'streamline', 'optimize', 'facilitate', 'amplify', 'catalyze',
-  'propel', 'spearhead', 'orchestrate', 'navigate', 'traverse',
-  // AI-favorite connectors
-  'furthermore', 'moreover', 'additionally', 'consequently', 'subsequently',
-  'thereby', 'thusly', 'wherein', 'whereby'
+// ─── Section 6.1: Banned Words (EXACT from addendum) ─────────────────────────
+const BANNED_WORDS = [
+  'utilize', 'delve', 'tapestry', 'landscape', 'paradigm', 'synergy',
+  'leverage', 'unlock', 'empower', 'pivotal', 'embark', 'underscore',
+  'paramount', 'seamlessly', 'robust', 'beacon', 'foster', 'elevate',
+  'curate', 'curated', 'bespoke', 'resonate', 'harness', 'intricate',
+  'plethora', 'myriad', 'groundbreaking', 'innovative', 'cutting-edge',
+  'state-of-the-art', 'game-changer', 'ever-evolving', 'rapidly-evolving',
+  'stakeholders', 'navigate', 'ecosystem', 'framework', 'comprehensive',
+  'transformative', 'holistic', 'nuanced', 'multifaceted', 'profound',
+  'furthermore'
 ];
 
-// Phrases that scream AI even if the words are fine in isolation
-const AI_FLAGGED_PHRASES = [
+// ─── Section 6.2: Banned Phrases (EXACT from addendum) ───────────────────────
+const BANNED_PHRASES = [
   "it's important to note that",
   "it's worth noting that",
-  "it's worth mentioning",
-  "it's crucial to",
-  "it is essential to",
-  "in conclusion,",
-  "in summary,",
-  "to summarize,",
+  "in conclusion",
+  "in summary",
   "a holistic approach",
-  "unlock your potential",
-  "unlock the power",
   "in the realm of",
-  "in the world of",
   "dive deep into",
-  "dive into",
-  "delve into",
   "at the end of the day",
   "in today's fast-paced world",
-  "in today's digital age",
-  "in today's modern world",
-  "in this digital age",
-  "when it comes to",
-  "navigate the complexities",
-  "a testament to",
-  "speaks volumes",
-  "the power of",
-  "the beauty of",
-  "the art of",
-  "the journey of",
-  "the key lies in",
-  "plays a crucial role",
-  "plays a vital role",
-  "plays a significant role",
-  "plays a pivotal role",
-  "a wide array of",
-  "a wide range of",
-  "a plethora of",
-  "a myriad of",
-  "stands as a",
-  "serves as a",
-  "acts as a",
-  "has emerged as",
-  "continues to evolve",
-  "has revolutionized",
-  "cannot be overstated",
-  "it goes without saying",
-  "needless to say",
-  "last but not least",
-  "first and foremost"
+  "plays a crucial role"
 ];
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/**
+ * Strip HTML tags for text analysis.
+ */
+function stripHtml(text) {
+  return text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Count words in HTML body.
+ */
 export function countWords(text) {
-  // Strip HTML tags for an accurate prose word count
-  const stripped = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  const stripped = stripHtml(text);
   return stripped ? stripped.split(/\s+/).length : 0;
 }
 
-export function hasEmDash(text) {
-  return text.includes('\u2014');  // em-dash U+2014
+/**
+ * Count Amazon affiliate links in the body.
+ */
+export function countAmazonLinks(text) {
+  const matches = text.match(/amazon\.com\/dp\/[A-Z0-9]{10}\?tag=/g) || [];
+  return matches.length;
 }
 
-export function findFlaggedWords(text) {
-  const stripped = text.replace(/<[^>]+>/g, ' ').toLowerCase();
+/**
+ * Extract ASINs from text.
+ */
+export function extractAsinsFromText(text) {
+  const matches = text.match(/amazon\.com\/dp\/([A-Z0-9]{10})/g) || [];
+  return [...new Set(matches.map(m => m.replace('amazon.com/dp/', '')))];
+}
+
+/**
+ * Section 6.3: Auto-replace em-dashes with " - " (hyphen with spaces).
+ * Returns the cleaned text.
+ */
+export function replaceEmDashes(text) {
+  return text.replace(/[\u2014\u2013]/g, ' - ');
+}
+
+/**
+ * Check if any em-dashes survived after replacement (should never happen
+ * if replaceEmDashes was called first, but this is the safety check).
+ */
+export function hasEmDash(text) {
+  return text.includes('\u2014') || text.includes('\u2013');
+}
+
+/**
+ * Section 6.1: Find banned words in text.
+ */
+export function findBannedWords(text) {
+  const stripped = stripHtml(text).toLowerCase();
   const found = [];
-  for (const w of AI_FLAGGED_WORDS) {
-    if (new RegExp(`\\b${w.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i').test(stripped)) {
-      found.push(w);
+  for (const word of BANNED_WORDS) {
+    const escaped = word.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+    if (new RegExp(`\\b${escaped}\\b`, 'i').test(stripped)) {
+      found.push(word);
     }
   }
   return found;
 }
 
-export function findFlaggedPhrases(text) {
-  const stripped = text.replace(/<[^>]+>/g, ' ').toLowerCase().replace(/\s+/g, ' ');
-  return AI_FLAGGED_PHRASES.filter(p => stripped.includes(p));
+/**
+ * Section 6.2: Find banned phrases in text.
+ */
+export function findBannedPhrases(text) {
+  const stripped = stripHtml(text).toLowerCase().replace(/\s+/g, ' ');
+  return BANNED_PHRASES.filter(p => stripped.includes(p.toLowerCase()));
 }
 
+/**
+ * Section 6.7: Voice & Tone signals.
+ */
 export function voiceSignals(text) {
-  const stripped = text.replace(/<[^>]+>/g, ' ');
+  const stripped = stripHtml(text);
   const lower = stripped.toLowerCase();
 
-  // Contractions (you're, don't, it's, can't, etc.)
+  // Contractions
   const contractions = (lower.match(/\b\w+'(s|re|ve|d|ll|m|t)\b/g) || []).length;
 
   // Direct address (you, your, you're)
-  const directAddress = (lower.match(/\byou('re|r|rself|)?\b/g) || []).length;
+  const directAddress = (lower.match(/\byou('re|r|rself)?\b/g) || []).length;
 
-  // First person singular (I, I'm, I've, my, me)
-  const firstPerson = (lower.match(/\b(i|i'm|i've|i'd|i'll|my|me|mine)\b/g) || []).length;
-
-  // Sentence length variance
-  const sentences = stripped.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0);
-  const lengths = sentences.map(s => s.split(/\s+/).length);
-  const avg = lengths.reduce((a, b) => a + b, 0) / (lengths.length || 1);
-  const variance = lengths.reduce((sum, len) => sum + Math.pow(len - avg, 2), 0) / (lengths.length || 1);
-  const stdDev = Math.sqrt(variance);
-  const shortSentences = lengths.filter(l => l <= 6).length;
-  const longSentences = lengths.filter(l => l >= 25).length;
-
-  // Conversational markers
-  const conversationalMarkers = [
-    /\bhere's the thing\b/i, /\blook,\s/i, /\bhonestly,?\s/i, /\btruth is\b/i,
-    /\bthe truth\b/i, /\bi'll tell you\b/i, /\bthink about it\b/i,
-    /\bthat said\b/i, /\bbut here's\b/i, /\bso yeah\b/i, /\bkind of\b/i,
-    /\bsort of\b/i, /\byou know\b/i
+  // Conversational dialogue markers from addendum
+  const dialogueMarkers = [
+    /right\?!/i, /know what i mean\??/i, /does that land\??/i,
+    /how does that make you feel\??/i, /here's the thing/i,
+    /look,/i, /honestly/i, /truth is/i, /think about it/i,
+    /so yeah/i, /you know\??/i
   ];
-  const markerCount = conversationalMarkers.filter(r => r.test(stripped)).length;
+  const markerCount = dialogueMarkers.filter(r => r.test(stripped)).length;
 
-  return {
-    contractions,
-    directAddress,
-    firstPerson,
-    sentenceCount: sentences.length,
-    avgSentenceLength: +avg.toFixed(1),
-    sentenceStdDev: +stdDev.toFixed(1),
-    shortSentences,
-    longSentences,
-    conversationalMarkers: markerCount
-  };
+  return { contractions, directAddress, markerCount };
 }
 
+/**
+ * THE PAUL VOICE GATE — Run all checks.
+ *
+ * The caller MUST call replaceEmDashes() on the body BEFORE passing it here.
+ * If this returns passed=false, the article must be regenerated.
+ *
+ * @param {string} body - Article HTML body (em-dashes already replaced)
+ * @returns {Object} { passed, failures, wordCount, amazonLinks, asins }
+ */
 export function runQualityGate(body) {
   const failures = [];
-  const warnings = [];
 
-  // Word count
+  // Section 6.4: Word Count (1,200–2,500)
   const words = countWords(body);
   if (words < 1200) failures.push(`words-too-low:${words}`);
   if (words > 2500) failures.push(`words-too-high:${words}`);
 
-  // Amazon links
+  // Section 6.5: Amazon Affiliate Links (exactly 3 or 4)
   const links = countAmazonLinks(body);
   if (links < 3) failures.push(`amazon-links-too-few:${links}`);
   if (links > 4) failures.push(`amazon-links-too-many:${links}`);
 
-  // Em-dash
+  // Section 6.3: Em-dashes (should be zero after replaceEmDashes)
   if (hasEmDash(body)) failures.push('contains-em-dash');
 
-  // AI-flagged words
-  const bw = findFlaggedWords(body);
-  if (bw.length > 0) failures.push(`ai-flagged-words:${bw.join(',')}`);
+  // Section 6.1: Banned Words
+  const bannedWords = findBannedWords(body);
+  if (bannedWords.length > 0) failures.push(`banned-words:${bannedWords.join(',')}`);
 
-  // AI-flagged phrases
-  const bp = findFlaggedPhrases(body);
-  if (bp.length > 0) failures.push(`ai-flagged-phrases:${bp.join('|')}`);
+  // Section 6.2: Banned Phrases
+  const bannedPhrases = findBannedPhrases(body);
+  if (bannedPhrases.length > 0) failures.push(`banned-phrases:${bannedPhrases.join('|')}`);
 
-  // Voice signals
+  // Section 6.7: Voice & Tone
   const voice = voiceSignals(body);
   const per1k = (n) => (n / words) * 1000;
 
-  // Contractions: at least 4 per 1000 words
+  // Must use contractions (at least 4 per 1000 words)
   if (per1k(voice.contractions) < 4) {
-    failures.push(`contractions-too-few:${voice.contractions}(${per1k(voice.contractions).toFixed(1)}/1k)`);
+    failures.push(`contractions-too-few:${voice.contractions}`);
   }
 
-  // Direct address OR first person must be present
-  if (voice.directAddress === 0 && voice.firstPerson === 0) {
-    failures.push('no-direct-address-or-first-person');
+  // Must use direct address ("you")
+  if (voice.directAddress < 3) {
+    failures.push(`no-direct-address:${voice.directAddress}`);
   }
 
-  // Sentence length variance
-  if (voice.sentenceStdDev < 4) {
-    failures.push(`sentence-variance-too-low:${voice.sentenceStdDev}`);
-  }
-
-  // Must have some short sentences (<=6 words)
-  if (voice.shortSentences < 2) {
-    failures.push(`too-few-short-sentences:${voice.shortSentences}`);
-  }
-
-  // At least 2 conversational markers
-  if (voice.conversationalMarkers < 2) {
-    warnings.push(`conversational-markers-low:${voice.conversationalMarkers}`);
+  // Must have 2-3 conversational dialogue markers
+  if (voice.markerCount < 2) {
+    failures.push(`dialogue-markers-too-few:${voice.markerCount}`);
   }
 
   return {
     passed: failures.length === 0,
     failures,
-    warnings,
     wordCount: words,
     amazonLinks: links,
     asins: extractAsinsFromText(body),
